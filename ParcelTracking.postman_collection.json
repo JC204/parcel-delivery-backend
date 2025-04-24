@@ -1,0 +1,138 @@
+{
+  "info": {
+    "name": "Parcel Tracking API",
+    "description": "API collection for the Parcel Tracking System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Parcel",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/parcels",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "parcels"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"sender\": {\n        \"name\": \"John Smith\",\n        \"email\": \"john@example.com\",\n        \"phone\": \"123-456-7890\",\n        \"address\": \"123 Sender St, City, Country\"\n    },\n    \"recipient\": {\n        \"name\": \"Jane Doe\",\n        \"email\": \"jane@example.com\",\n        \"phone\": \"987-654-3210\",\n        \"address\": \"456 Recipient Ave, City, Country\"\n    },\n    \"weight\": 2.5,\n    \"description\": \"Electronics package\"\n}"
+        },
+        "description": "Create a new parcel shipment"
+      }
+    },
+    {
+      "name": "Track Parcel",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/parcels/track/{{tracking_number}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "parcels", "track", "{{tracking_number}}"]
+        },
+        "description": "Track a parcel using its tracking number"
+      }
+    },
+    {
+      "name": "Update Parcel Status",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/parcels/{{tracking_number}}/update",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "parcels", "{{tracking_number}}", "update"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"status\": \"in_transit\",\n    \"note\": \"Package is in transit to destination\"\n}"
+        },
+        "description": "Update the status of a parcel"
+      }
+    },
+    {
+      "name": "Get Couriers",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/couriers",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "couriers"]
+        },
+        "description": "Get list of available couriers"
+      }
+    },
+    {
+      "name": "Assign Courier",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/parcels/{{tracking_number}}/assign-courier",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "parcels", "{{tracking_number}}", "assign-courier"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"courier_id\": \"john_doe\"\n}"
+        },
+        "description": "Assign a courier to a parcel"
+      }
+    },
+    {
+      "name": "Unassign Courier",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/parcels/{{tracking_number}}/unassign-courier",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "parcels", "{{tracking_number}}", "unassign-courier"]
+        },
+        "description": "Unassign a courier from a parcel"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "tracking_number",
+      "value": "YOUR_TRACKING_NUMBER",
+      "description": "Tracking number of the parcel"
+    }
+  ]
+}
