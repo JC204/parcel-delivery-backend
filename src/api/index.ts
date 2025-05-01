@@ -1,7 +1,7 @@
 import { Parcel, TrackingUpdate, Courier } from '../types';
 
 // Dynamically set API_URL based on the environment (local or ngrok)
-const API_URL = "https://d78d-2603-3005-2b2c-a680-9c2b-f471-364d-566a.ngrok-free.app";
+const API_URL = 'http://localhost:5000';
 
 export async function trackParcel(trackingNumber: string): Promise<Parcel> {
   const res = await fetch(`${API_URL}/parcels/track/${trackingNumber}`);
