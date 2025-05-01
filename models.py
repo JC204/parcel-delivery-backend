@@ -5,44 +5,82 @@ db = SQLAlchemy()
 
 class Customer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(120), nullable=False)
-    phone = db.Column(db.String(20), nullable=False)
-    address = db.Column(db.String(200), nullable=False)
-    
-    # Relationships
-    sent_parcels = db.relationship('Parcel', backref='sender', foreign_keys='Parcel.sender_id')
-    received_parcels = db.relationship('Parcel', backref='recipient', foreign_keys='Parcel.recipient_id')
+    name = db.Column(db.String(100))
+    email = db.Column(db.String(120))
+    phone = db.Column(db.String(20))
+    address = db.Column(db.String(200))
 
-class Parcel(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    tracking_number = db.Column(db.String(8), unique=True, nullable=False)
-    status = db.Column(db.String(20), nullable=False, default='pending')
-    weight = db.Column(db.Float, nullable=False)
-    description = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    
-    # Foreign Keys
-    sender_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
-    recipient_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
-    courier_id = db.Column(db.Integer, db.ForeignKey('courier.id'), nullable=True)
-    
-    # Relationships
-    tracking_updates = db.relationship('TrackingUpdate', backref='parcel', lazy='dynamic')
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'email': self.email,
+            'phone': self.phone,
+            'address': self.address
+        }
 
 class Courier(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    phone = db.Column(db.String(20), nullable=False)
-    status = db.Column(db.String(20), nullable=False, default='available')
-    
-    # Relationship
-    parcels = db.relationship('Parcel', backref='courier')
+    id = db.Column(db.String(10), primary_key=True)  # Kept as string if necessary, but typically an Integer would be more efficient
+    name = db.Column(db.String(100))
+    email = db.Column(db.String(120))
+    phone = db.Column(db.String(20))
+    vehicle = db.Column(db.String(50))
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'email': self.email,
+            'phone': self.phone,
+            'vehicle': self.vehicle
+        }
+
+class Parcel(db.Model):
+    tracking_number = db.Column(db.String(12), primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('customer.id'))
+    recipient_id = db.Column(db.Integer, db.ForeignKey('customer.id'))
+    courier_id = db.Column(db.String(10), db.ForeignKey('courier.id'))
+    weight = db.Column(db.Float)
+    length = db.Column(db.Float)
+    width = db.Column(db.Float)
+    height = db.Column(db.Float)
+    service_type = db.Column(db.String(20))
+    estimated_delivery = db.Column(db.DateTime)
+
+    sender = db.relationship('Customer', foreign_keys=[sender_id])
+    recipient = db.relationship('Customer', foreign_keys=[recipient_id])
+    courier = db.relationship('Courier', backref='parcels')
+    updates = db.relationship('TrackingUpdate', backref='parcel', order_by='TrackingUpdate.timestamp')
+
+    def to_dict(self):
+        return {
+            'tracking_number': self.tracking_number,
+            'sender': self.sender.to_dict(),
+            'recipient': self.recipient.to_dict(),
+            'courier': self.courier.to_dict(),
+            'weight': self.weight,
+            'dimensions': {
+                'length': self.length,
+                'width': self.width,
+                'height': self.height
+            },
+            'service_type': self.service_type,
+            'estimated_delivery': self.estimated_delivery.isoformat() if self.estimated_delivery else None,
+            'history': [update.to_dict() for update in self.updates]
+        }
 
 class TrackingUpdate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    parcel_id = db.Column(db.Integer, db.ForeignKey('parcel.id'), nullable=False)
-    status = db.Column(db.String(20), nullable=False)
-    location = db.Column(db.String(200), nullable=False)
-    description = db.Column(db.Text, nullable=False)
-    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    parcel_id = db.Column(db.String(12), db.ForeignKey('parcel.tracking_number'))
+    status = db.Column(db.String(50))
+    location = db.Column(db.String(100))
+    description = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'status': self.status,
+            'location': self.location,
+            'description': self.description,
+            'timestamp': self.timestamp.isoformat()
+        }

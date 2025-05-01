@@ -1,164 +1,138 @@
-import React, { useState } from 'react';
-import { Package } from 'lucide-react';
-import { createParcel } from '../api';
+// src/components/ParcelForm.tsx
+import React, { useState } from "react";
+import axios from "axios";
+import { motion, AnimatePresence } from "framer-motion";
 
-export function ParcelForm() {
-  const [formData, setFormData] = useState({
-    senderName: '',
-    senderEmail: '',
-    senderPhone: '',
-    senderAddress: '',
-    recipientName: '',
-    recipientEmail: '',
-    recipientPhone: '',
-    recipientAddress: '',
-    weight: '',
-    description: '',
+interface Parcel {
+  sender: string;
+  recipient: string;
+  weight: number;
+  description: string;
+}
+
+const ParcelForm: React.FC = () => {
+  const [parcel, setParcel] = useState<Parcel>({
+    sender: "",
+    recipient: "",
+    weight: 0,
+    description: "",
   });
-
-  const [loading, setLoading] = useState(false);
-  const [trackingNumber, setTrackingNumber] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [trackingNumber, setTrackingNumber] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setParcel(prev => ({
+      ...prev,
+      [name]: name === "weight" ? parseFloat(value) || 0 : value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setTrackingNumber(null);
-
     try {
-      const parcelData = {
-        sender: {
-          name: formData.senderName,
-          email: formData.senderEmail,
-          phone: formData.senderPhone,
-          address: formData.senderAddress,
-        },
-        recipient: {
-          name: formData.recipientName,
-          email: formData.recipientEmail,
-          phone: formData.recipientPhone,
-          address: formData.recipientAddress,
-        },
-        weight: parseFloat(formData.weight),
-        description: formData.description,
-      };
-
-      const response = await createParcel(parcelData);
-      setTrackingNumber(response.tracking_number);
-
-      // Reset form
-      setFormData({
-        senderName: '',
-        senderEmail: '',
-        senderPhone: '',
-        senderAddress: '',
-        recipientName: '',
-        recipientEmail: '',
-        recipientPhone: '',
-        recipientAddress: '',
-        weight: '',
-        description: '',
-      });
-    } catch (err) {
-      setError('Failed to create parcel. Please try again.');
-    } finally {
-      setLoading(false);
+      const response = await axios.post("http://localhost:5000/parcels", parcel);
+      setTrackingNumber(response.data.tracking_number);
+      setSubmitted(true);
+    } catch (error) {
+      console.error("Error submitting parcel:", error);
+      alert("Failed to submit parcel. Please try again.");
     }
   };
 
+  const resetForm = () => {
+    setParcel({
+      sender: "",
+      recipient: "",
+      weight: 0,
+      description: "",
+    });
+    setTrackingNumber("");
+    setSubmitted(false);
+  };
+
   return (
-    <div className="max-w-2xl mx-auto bg-white rounded-lg shadow p-6 mt-6">
-      <div className="flex items-center justify-center mb-6">
-        <Package className="w-8 h-8 text-blue-600 mr-2" />
-        <h2 className="text-2xl font-bold text-gray-800">Create New Shipment</h2>
-      </div>
+    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-2xl shadow-lg">
+      <AnimatePresence mode="wait">
+        {!submitted ? (
+          <motion.form
+            key="form"
+            onSubmit={handleSubmit}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -30 }}
+            transition={{ duration: 0.4 }}
+            className="space-y-4"
+          >
+            <h2 className="text-xl font-bold text-center mb-4">Create a Parcel</h2>
 
-      {error && <p className="mb-4 p-3 bg-red-100 text-red-700 rounded">{error}</p>}
-      {trackingNumber && (
-        <p className="mb-4 p-3 bg-green-100 text-green-700 rounded">
-          Shipment created successfully! Tracking #: <strong>{trackingNumber}</strong>
-        </p>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Sender Info */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Sender</h3>
-            {["Name", "Email", "Phone", "Address"].map((field) => (
-              <input
-                key={field}
-                type={field === "Email" ? "email" : field === "Phone" ? "tel" : "text"}
-                name={`sender${field}`}
-                value={(formData as any)[`sender${field}`]}
-                onChange={handleChange}
-                placeholder={`Sender's ${field}`}
-                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-500"
-                disabled={loading}
-                required
-              />
-            ))}
-          </div>
-
-          {/* Recipient Info */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Recipient</h3>
-            {["Name", "Email", "Phone", "Address"].map((field) => (
-              <input
-                key={field}
-                type={field === "Email" ? "email" : field === "Phone" ? "tel" : "text"}
-                name={`recipient${field}`}
-                value={(formData as any)[`recipient${field}`]}
-                onChange={handleChange}
-                placeholder={`Recipient's ${field}`}
-                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-500"
-                disabled={loading}
-                required
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Parcel Info */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Parcel Details</h3>
-          <input
-            type="number"
-            name="weight"
-            value={formData.weight}
-            onChange={handleChange}
-            placeholder="Weight (kg)"
-            min="0.1"
-            step="0.1"
-            className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-            disabled={loading}
-            required
-          />
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            placeholder="Parcel Description"
-            className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-            disabled={loading}
-            required
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition disabled:opacity-50"
-          disabled={loading}
-        >
-          {loading ? 'Creating...' : 'Create Shipment'}
-        </button>
-      </form>
+            <input
+              type="text"
+              name="sender"
+              value={parcel.sender}
+              onChange={handleChange}
+              placeholder="Sender Name"
+              className="w-full p-2 border border-gray-300 rounded"
+              required
+            />
+            <input
+              type="text"
+              name="recipient"
+              value={parcel.recipient}
+              onChange={handleChange}
+              placeholder="Recipient Name"
+              className="w-full p-2 border border-gray-300 rounded"
+              required
+            />
+            <input
+              type="number"
+              name="weight"
+              value={parcel.weight}
+              onChange={handleChange}
+              placeholder="Weight (kg)"
+              className="w-full p-2 border border-gray-300 rounded"
+              min={0.1}
+              step={0.1}
+              required
+            />
+            <textarea
+              name="description"
+              value={parcel.description}
+              onChange={handleChange}
+              placeholder="Description"
+              className="w-full p-2 border border-gray-300 rounded"
+              required
+            />
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+            >
+              Submit Parcel
+            </button>
+          </motion.form>
+        ) : (
+          <motion.div
+            key="success"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.4 }}
+            className="text-center"
+          >
+            <h2 className="text-2xl font-semibold text-green-600 mb-4">Parcel Submitted!</h2>
+            <p className="mb-2 text-gray-700">Tracking Number:</p>
+            <p className="text-lg font-mono bg-gray-100 p-2 rounded mb-4">{trackingNumber}</p>
+            <button
+              onClick={resetForm}
+              className="mt-2 bg-gray-800 text-white py-2 px-4 rounded hover:bg-gray-900 transition"
+            >
+              Create Another
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
-}
+};
+
+export default ParcelForm;

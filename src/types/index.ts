@@ -1,6 +1,8 @@
-// Customer information
+// types.ts
+
+// Customer structure
 export interface Customer {
-  id?: number;
+  id?: number | string;
   name: string;
   email: string;
   phone: string;
@@ -9,35 +11,54 @@ export interface Customer {
 
 // Courier details
 export interface Courier {
-  id?: number;
+  id: string;
   name: string;
   email?: string;
-  phone: string;
-  status: 'available' | 'assigned' | 'busy';
+  phone?: string;
 }
 
-// Individual tracking update (history)
+// A single tracking update in the parcel's history
 export interface TrackingUpdate {
-  id?: number;
-  status: 'pending' | 'assigned' | 'in_transit' | 'delivered' | string;
-  note?: string;
-  location?: string;
-  timestamp?: string;
-  description: string
+  status: string;
+  location: string;
+  timestamp: string;
+  description: string;
 }
 
-// Main Parcel object used throughout app
+// Parcel object
 export interface Parcel {
-  id?: number;
   tracking_number: string;
-  status: 'pending' | 'assigned' | 'in_transit' | 'delivered';
   sender: Customer;
   recipient: Customer;
-  weight: number;
-  description: string;
-  created_at?: string;
-  courier_id?: number;
-  courier?: Courier;
-  tracking_updates?: TrackingUpdate[]; // Used for full timeline/history view
-  history?: TrackingUpdate[];         // Alias for old naming convention
+  weight?: number;
+  dimensions?: {
+    length: number;
+    width: number;
+    height: number;
+  };
+  service_type?: string;
+  tracking_history?: TrackingUpdate[];
+  courier_id?: string;
+  courier_name?: string;
+  estimated_delivery?: string;
+  status?: string;
+}
+
+// Response structure after creating a parcel
+export interface ParcelCreationResponse {
+  parcel: Parcel;
+  success: boolean;
+  message?: string;
+}
+
+// Courier login/auth response
+export interface AuthResponse {
+  token?: string;
+  user?: {
+    id: string;
+    name: string;
+    role: string;
+  };
+  success: boolean;
+  message?: string;
 }

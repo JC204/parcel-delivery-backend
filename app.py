@@ -1,109 +1,148 @@
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
-import random
-import string
+from models import db, Customer, Courier, Parcel, TrackingUpdate
+from flask_migrate import Migrate
+from faker import Faker
+import random, string, datetime
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///parcel_delivery.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Fully working CORS for production frontend on Netlify
-CORS(app, resources={r"/api/*": {"origins": [
-    "https://lambent-zuccutto-51a147.netlify.app",
-    "https://68092bc8e13a1f00c21b6c83--lambent-zuccutto-51a147.netlify.app"
-]}}, supports_credentials=True)
+db.init_app(app)
+CORS(app, origins=[
+    "https://comforting-syrniki-99725d.netlify.app",  # Netlify frontend
+    "http://localhost:5173"                           # Vite dev server
+])
 
-# In-memory storage
-parcels = {}
-couriers = {
-    "john_doe": {
-        "name": "John Doe",
-        "email": "john@example.com",
-        "phone": "123-456-7890",
-        "status": "available"
-    },
-    "jane_smith": {
-        "name": "Jane Smith",
-        "email": "jane@example.com",
-        "phone": "987-654-3210",
-        "status": "available"
-    }
-}
+migrate = Migrate(app, db)
+fake = Faker()
+first_request = True
 
 def generate_tracking_number():
-    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
 
-# Create a new parcel
-@app.route('/api/parcels', methods=['POST'])
+def get_or_create_customer(data):
+    return Customer.query.filter_by(
+        name=data['name'],
+        email=data['email'],
+        phone=data['phone'],
+        address=data['address']
+    ).first() or Customer(**data)
+
+def create_tracking_update(parcel, status, location='', description=''):
+    update = TrackingUpdate(
+        parcel_id=parcel.tracking_number,
+        status=status,
+        location=location,
+        description=description
+    )
+    db.session.add(update)
+
+@app.before_request
+def initialize_app():
+    global first_request
+    if first_request:
+        db.create_all()
+
+        # Seed couriers
+        if not Courier.query.first():
+            db.session.bulk_save_objects([
+                Courier(id='CR001', name='John Doe', email='john@example.com', phone='1234567890', vehicle='Van'),
+                Courier(id='CR002', name='Jane Smith', email='jane@example.com', phone='0987654321', vehicle='Bike')
+            ])
+            db.session.commit()
+
+        # Seed parcels
+        if not Parcel.query.first():
+            for _ in range(10):
+                sender = Customer(name=fake.name(), email=fake.email(), phone=fake.phone_number(), address=fake.address())
+                recipient = Customer(name=fake.name(), email=fake.email(), phone=fake.phone_number(), address=fake.address())
+                tracking_number = generate_tracking_number()
+                courier = random.choice(Courier.query.all())
+                parcel = Parcel(
+                    tracking_number=tracking_number,
+                    sender=sender,
+                    recipient=recipient,
+                    weight=round(random.uniform(0.5, 10.0), 2),
+                    length=round(random.uniform(10.0, 100.0), 2),
+                    width=round(random.uniform(10.0, 100.0), 2),
+                    height=round(random.uniform(5.0, 50.0), 2),
+                    service_type=random.choice(['Standard', 'Express']),
+                    courier_id=courier.id,
+                    estimated_delivery=datetime.datetime.utcnow() + datetime.timedelta(days=3)
+                )
+                db.session.add_all([sender, recipient, parcel])
+                create_tracking_update(parcel, 'Shipped', fake.city(), 'Parcel created')
+            db.session.commit()
+
+        print("App initialized with demo data and CORS setup.")
+        first_request = False
+
+@app.route('/parcels', methods=['GET'])
+def get_all_parcels():
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    parcels = Parcel.query.paginate(page=page, per_page=per_page, error_out=False)
+    return jsonify({
+        'parcels': [p.to_dict() for p in parcels.items],
+        'total': parcels.total,
+        'pages': parcels.pages,
+        'current_page': parcels.page
+    })
+
+@app.route('/parcels/<tracking_number>', methods=['GET'])
+def get_parcel(tracking_number):
+    parcel = Parcel.query.get(tracking_number)
+    return jsonify(parcel.to_dict()) if parcel else (jsonify({'error': 'Parcel not found'}), 404)
+
+@app.route('/parcels', methods=['POST'])
 def create_parcel():
     data = request.json
     tracking_number = generate_tracking_number()
-    parcels[tracking_number] = {
-        "sender": data.get("sender"),
-        "recipient": data.get("recipient"),
-        "weight": data.get("weight"),
-        "description": data.get("description"),
-        "status": "pending",
-        "courier": None,
-        "history": [{"status": "pending", "note": "Parcel created"}]
-    }
-    return jsonify({"message": "Parcel created successfully", "tracking_number": tracking_number}), 201
+    sender = get_or_create_customer(data['sender'])
+    recipient = get_or_create_customer(data['recipient'])
 
-# Track a parcel
-@app.route('/api/parcels/track/<tracking_number>', methods=['GET'])
-def track_parcel(tracking_number):
-    parcel = parcels.get(tracking_number)
-    if parcel:
-        return jsonify({
-            "tracking_number": tracking_number,
-            **parcel
-        }), 200
-    return jsonify({"error": "Parcel not found"}), 404
+    if not sender.id: db.session.add(sender)
+    if not recipient.id: db.session.add(recipient)
+    db.session.commit()
 
-# Update parcel status
-@app.route('/api/parcels/<tracking_number>/update', methods=['POST'])
+    courier = random.choice(Courier.query.all())
+    parcel = Parcel(
+        tracking_number=tracking_number,
+        sender_id=sender.id,
+        recipient_id=recipient.id,
+        weight=data.get('weight'),
+        length=data.get('length'),
+        width=data.get('width'),
+        height=data.get('height'),
+        service_type=data.get('service_type'),
+        courier_id=courier.id,
+        estimated_delivery=datetime.datetime.utcnow() + datetime.timedelta(days=3)
+    )
+    db.session.add(parcel)
+    create_tracking_update(parcel, 'Shipped', 'Warehouse', 'Parcel has been shipped')
+    db.session.commit()
+    return jsonify({'tracking_number': tracking_number}), 201
+
+@app.route('/parcels/<tracking_number>/update', methods=['POST'])
 def update_parcel_status(tracking_number):
+    parcel = Parcel.query.get(tracking_number)
+    if not parcel:
+        return jsonify({'error': 'Parcel not found'}), 404
     data = request.json
-    parcel = parcels.get(tracking_number)
-    if parcel:
-        status = data.get("status")
-        note = data.get("note", "")
-        parcel["status"] = status
-        parcel["history"].append({"status": status, "note": note})
-        return jsonify({"message": "Status updated"}), 200
-    return jsonify({"error": "Parcel not found"}), 404
+    create_tracking_update(parcel, data['status'], data.get('location', ''), data.get('description', ''))
+    db.session.commit()
+    return jsonify({'message': 'Tracking update added'}), 200
 
-# Assign courier to parcel
-@app.route('/api/parcels/<tracking_number>/assign-courier', methods=['POST'])
-def assign_courier(tracking_number):
-    data = request.json
-    courier_id = data.get("courier_id")
-    parcel = parcels.get(tracking_number)
-    courier = couriers.get(courier_id)
-    if parcel and courier:
-        if courier["status"] != "available":
-            return jsonify({"error": "Courier not available"}), 400
-        parcel["courier"] = courier_id
-        courier["status"] = "assigned"
-        parcel["history"].append({"status": "assigned", "note": f"Assigned to {courier['name']}"})
-        return jsonify({"message": "Courier assigned"}), 200
-    return jsonify({"error": "Parcel or courier not found"}), 404
-
-# Get list of couriers
-@app.route('/api/couriers', methods=['GET'])
+@app.route('/couriers', methods=['GET'])
 def get_couriers():
-    return jsonify({"couriers": couriers}), 200
+    return jsonify([c.to_dict() for c in Courier.query.all()])
 
-@app.route('/api/parcels/<tracking_number>/unassign-courier', methods=['POST'])
-def unassign_courier(tracking_number):
-    parcel = parcels.get(tracking_number)
-    if parcel and parcel["courier"]:
-        courier_id = parcel["courier"]
-        courier = couriers.get(courier_id)
-        if courier:
-            courier["status"] = "available"
-        parcel["history"].append({"status": "unassigned", "note": f"Courier {courier_id} unassigned"})
-        parcel["courier"] = None
-        return jsonify({"message": "Courier unassigned"}), 200
-    return jsonify({"error": "Parcel not found or no courier assigned"}), 404
+@app.route('/couriers/<courier_id>/parcels', methods=['GET'])
+def get_parcels_for_courier(courier_id):
+    parcels = Parcel.query.filter_by(courier_id=courier_id).all()
+    return jsonify([p.to_dict() for p in parcels])
 
 if __name__ == '__main__':
     app.run(debug=True)

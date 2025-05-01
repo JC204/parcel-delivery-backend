@@ -1,54 +1,146 @@
-import React, { useState } from 'react';
-import { Truck, Package, Search } from 'lucide-react';
-import { ParcelTracker } from './components/ParcelTracker';
-import { ParcelForm } from './components/ParcelForm';
+import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import ParcelForm from './components/ParcelForm';
+import TrackingPage from './components/ParcelTracker';
+import { CourierLogin } from './components/CourierLogin';
+import { CourierDashboard } from './components/CourierDashboard';
+import { Package, Truck, Search } from 'lucide-react';
 
-function App() {
-  const [activeTab, setActiveTab] = useState<'track' | 'create'>('track');
+
+
+const AppContent = ({
+  courierId,
+  handleCourierLogin,
+  handleCourierLogout,
+}: {
+  courierId: string | null;
+  handleCourierLogin: (id: string) => void;
+  handleCourierLogout: () => void;
+}) => {
+  const location = useLocation();
+
+  // Sample demo data for parcels (mimicking a real-world response from your backend)
+  const demoParcels = [
+    {
+      trackingNumber: '123456',
+      sender: 'John Doe',
+      recipient: 'Jane Smith',
+      description: 'Laptop, fragile',
+      status: 'Shipped',
+    },
+    {
+      trackingNumber: '654321',
+      sender: 'Mary Johnson',
+      recipient: 'James Williams',
+      description: 'Books, medium weight',
+      status: 'In Transit',
+    },
+    {
+      trackingNumber: '789012',
+      sender: 'Robert Brown',
+      recipient: 'Michael Davis',
+      description: 'Clothes, large box',
+      status: 'Delivered',
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Truck className="w-8 h-8 text-blue-600" />
-              <h1 className="ml-2 text-2xl font-bold text-gray-900">ParcelPro</h1>
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.3 }}
+      >
+        <Routes location={location}>
+          <Route path="/" element={<ParcelForm />} />
+          <Route path="/track" element={<TrackingPage />} />
+          <Route path="/track/:trackingNumber" element={<TrackingPage />} />
+          <Route
+            path="/courier"
+            element={
+              courierId ? (
+                <CourierDashboard
+                  courierId={courierId}
+                  onLogout={handleCourierLogout}
+                  demoParcels={demoParcels} // Passing demo data to CourierDashboard
+                />
+              ) : (
+                <CourierLogin onLogin={handleCourierLogin} />
+              )
+            }
+          />
+        </Routes>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
+function App() {
+  const [courierId, setCourierId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const storedId = localStorage.getItem('courierId');
+    if (storedId) setCourierId(storedId);
+  }, []);
+
+  const handleCourierLogin = (id: string) => {
+    setCourierId(id);
+    localStorage.setItem('courierId', id);
+  };
+
+  const handleCourierLogout = () => {
+    setCourierId(null);
+    localStorage.removeItem('courierId');
+  };
+
+  const navLinks = [
+    { to: '/', label: 'Ship', icon: <Package className="h-4 w-4 mr-2" /> },
+    { to: '/track', label: 'Track', icon: <Search className="h-4 w-4 mr-2" /> },
+    { to: '/courier', label: 'Courier', icon: <Truck className="h-4 w-4 mr-2" /> },
+  ];
+
+  return (
+    <Router>
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <header className="bg-blue-600 text-white shadow-md">
+          <div className="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center">
+            <div className="flex items-center mb-4 md:mb-0">
+              <Package className="h-8 w-8 mr-2" />
+              <h1 className="text-2xl font-bold">ParcelPro</h1>
             </div>
-            <nav className="flex space-x-4">
-              <button
-                onClick={() => setActiveTab('track')}
-                className={`flex items-center px-4 py-2 rounded-lg ${
-                  activeTab === 'track'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <Search className="w-5 h-5 mr-1" />
-                Track
-              </button>
-              <button
-                onClick={() => setActiveTab('create')}
-                className={`flex items-center px-4 py-2 rounded-lg ${
-                  activeTab === 'create'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <Package className="w-5 h-5 mr-1" />
-                New Shipment
-              </button>
+            <nav className="flex flex-wrap gap-2 md:gap-4">
+              {navLinks.map(({ to, label, icon }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  className="px-3 py-2 rounded hover:bg-blue-700 transition-colors flex items-center"
+                >
+                  {icon}
+                  <span>{label}</span>
+                </Link>
+              ))}
             </nav>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === 'track' ? <ParcelTracker /> : <ParcelForm />}
-      </main>
-    </div>
+        <main className="container mx-auto px-4 py-8 flex-grow">
+          <AppContent
+            courierId={courierId}
+            handleCourierLogin={handleCourierLogin}
+            handleCourierLogout={handleCourierLogout}
+          />
+        </main>
+
+        <footer className="bg-gray-100 border-t py-6">
+          <div className="container mx-auto text-center text-gray-600 text-sm">
+            &copy; {new Date().getFullYear()} ParcelPro Delivery System
+          </div>
+        </footer>
+      </div>
+    </Router>
   );
 }
 

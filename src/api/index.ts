@@ -1,7 +1,7 @@
 import { Parcel, TrackingUpdate, Courier } from '../types';
 
 // Will be replaced by deploy-all.sh — must use double quotes
-export const API_URL = 'http://localhost:5000';
+export const API_URL = import.meta.env.VITE_API_URL;
 
 export async function trackParcel(trackingNumber: string): Promise<Parcel> {
   const res = await fetch(`${API_URL}/parcels/track/${trackingNumber}`);
