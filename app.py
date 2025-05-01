@@ -92,7 +92,6 @@ def assign_courier(tracking_number):
 def get_couriers():
     return jsonify({"couriers": couriers}), 200
 
-# Unassign courier from parcel
 @app.route('/api/parcels/<tracking_number>/unassign-courier', methods=['POST'])
 def unassign_courier(tracking_number):
     parcel = parcels.get(tracking_number)

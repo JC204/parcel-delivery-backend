@@ -1,43 +1,55 @@
-import axios from 'axios';
-import { Parcel, Courier } from '../types';
+import { Parcel, TrackingUpdate, Courier } from '../types';
 
-const API_URL = 'https://9c54-2601-18f-687-72f0-b159-2473-9d0d-a242.ngrok-free.app'
-export const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  }
-});
+// Dynamically set API_URL based on the environment (local or ngrok)
+const API_URL = "https://d78d-2603-3005-2b2c-a680-9c2b-f471-364d-566a.ngrok-free.app";
 
-export const trackParcel = async (trackingNumber: string): Promise<Parcel> => {
-  const response = await api.get(`/parcels/track/${trackingNumber}`);
-  return response.data.parcel;
-};
+export async function trackParcel(trackingNumber: string): Promise<Parcel> {
+  const res = await fetch(`${API_URL}/parcels/track/${trackingNumber}`);
+  if (!res.ok) throw new Error('Failed to fetch tracking information');
+  return res.json();
+}
 
-export const createParcel = async (parcelData: any) => {
-  const response = await api.post('/parcels', parcelData);
-  return response.data;
-};
-
-export const assignCourier = async (trackingNumber: string, courierId: string) => {
-  const response = await api.post(`/parcels/${trackingNumber}/assign-courier`, {
-    courier_id: courierId
+export async function submitParcel(
+  parcelData: Omit<Parcel, 'tracking_number' | 'tracking_history'>
+): Promise<Parcel> {
+  const res = await fetch(`${API_URL}/parcels`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(parcelData),
   });
-  return response.data;
-};
+  if (!res.ok) throw new Error('Failed to submit parcel');
+  return res.json();
+}
 
-export const addTrackingUpdate = async (
+export async function getCouriers(): Promise<Courier[]> {
+  const res = await fetch(`${API_URL}/couriers`);
+  if (!res.ok) throw new Error('Failed to fetch couriers');
+  return res.json();
+}
+
+export async function getParcelsByCourier(courierId: string): Promise<Parcel[]> {
+  const res = await fetch(`${API_URL}/courier/${courierId}/parcels`);
+  if (!res.ok) throw new Error('Failed to fetch courier parcels');
+  return res.json();
+}
+
+export async function updateParcelStatus(
   trackingNumber: string,
-  updateData: {
-    status: string;
-    note: string;
-  }
-) => {
-  const response = await api.post(`/parcels/${trackingNumber}/update`, updateData);
-  return response.data;
-};
+  update: TrackingUpdate
+): Promise<Parcel> {
+  const res = await fetch(`${API_URL}/parcels/${trackingNumber}/status`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(update),
+  });
+  if (!res.ok) throw new Error('Failed to update parcel status');
+  return res.json();
+}
 
-export const getAvailableCouriers = async (): Promise<Record<string, Courier>> => {
-  const response = await api.get('/couriers');
-  return response.data.couriers;
-};
+export async function createTestParcel(): Promise<Parcel> {
+  const res = await fetch(`${API_URL}/test/create-parcel`, {
+    method: 'POST',
+  });
+  if (!res.ok) throw new Error('Failed to create test parcel');
+  return res.json();
+}
