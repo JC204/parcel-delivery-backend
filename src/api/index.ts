@@ -1,7 +1,7 @@
 import { Parcel, TrackingUpdate, Courier } from '../types';
 
 // Will be replaced by deploy-all.sh — must use double quotes
-export const API_URL = "https://2fb5-2603-3005-2b2c-a680-ccd2-f95-e23c-47fd.ngrok-free.app";
+export const API_URL = 'http://localhost:5000';
 
 export async function trackParcel(trackingNumber: string): Promise<Parcel> {
   const res = await fetch(`${API_URL}/parcels/track/${trackingNumber}`);
