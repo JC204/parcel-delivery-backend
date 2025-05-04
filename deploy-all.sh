@@ -62,6 +62,18 @@ fi
 
 echo -e "${GREEN}✅ ngrok URL is: $NGROK_URL${NC}"
 
+echo -e "${GREEN}👉 Verifying backend is reachable at $NGROK_URL...${NC}"
+HEALTH_CHECK=$(curl --silent --max-time 5 "$NGROK_URL/couriers" | grep -o 'CR00[1-9]')
+
+if [ -z "$HEALTH_CHECK" ]; then
+  echo -e "${RED}❌ Backend is not responding properly. Check Flask or ngrok logs.${NC}"
+  kill -9 $FLASK_PID $NGROK_PID
+  exit 1
+fi
+
+echo -e "${GREEN}✅ Backend is reachable and responding.${NC}"
+
+
 # Backup original API line in .env
 ORIGINAL_API_LINE=$(grep "VITE_API_URL" "$ENV_FILE")
 
