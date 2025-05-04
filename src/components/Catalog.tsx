@@ -114,55 +114,54 @@ const Catalog: React.FC = () => {
       closeModal();
     }
   };
-
+  
   return (
-    <div className="container mx-auto p-6" onClick={handleOutsideClick}>
+    <div className="container mx-auto p-6 dark:bg-gray-900 dark:text-white bg-white text-black min-h-screen" onClick={handleOutsideClick}>
       <h1 className="text-3xl font-bold mb-6 text-center">Parcel Catalog 📦</h1>
 
       <div className="flex justify-center items-center gap-3 mb-6">
-  <input
-    type="text"
-    placeholder="Search parcels..."
-    value={search}
-    onChange={handleSearchChange}
-    className="border border-gray-300 rounded-lg p-2 w-64 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-    aria-label="Search parcels"
-  />
-  <button
-    onClick={fetchParcels}
-    className="flex items-center gap-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 shadow-sm transition"
-    aria-label="Refresh parcel list"
-    disabled={loading}
-  >
-    <ArrowPathIcon className={`h-5 w-5 ${loading ? "animate-spin" : ""}`} />
-    Refresh
-  </button>
-  {loading && (
-    <span className="text-gray-600 text-sm animate-pulse">Loading parcels...</span>
-  )}
-</div>
-
+        <input
+          type="text"
+          placeholder="Search parcels..."
+          value={search}
+          onChange={handleSearchChange}
+          className="border border-gray-300 dark:border-gray-700 rounded-lg p-2 w-64 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:text-white"
+          aria-label="Search parcels"
+        />
+        <button
+          onClick={fetchParcels}
+          className="flex items-center gap-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 shadow-sm transition disabled:opacity-50"
+          aria-label="Refresh parcel list"
+          disabled={loading}
+        >
+          <ArrowPathIcon className={`h-5 w-5 ${loading ? "animate-spin" : ""}`} />
+          Refresh
+        </button>
+        {loading && (
+          <span className="text-gray-600 dark:text-gray-300 text-sm animate-pulse">Loading parcels...</span>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {currentParcels.map((parcel, index) => (
           <motion.div
             key={index}
-            className="bg-white rounded-2xl shadow-md p-6 hover:shadow-xl transition duration-300"
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 hover:shadow-xl transition duration-300 cursor-pointer"
             whileHover={{ scale: 1.05 }}
             onClick={() => handleParcelClick(parcel)}
             aria-label={`View details of parcel ${parcel.tracking_number}`}
           >
             <h2 className="text-xl font-semibold mb-2">📦 {parcel.tracking_number}</h2>
-            <p className="text-gray-700 mb-1">
+            <p className="text-gray-700 dark:text-gray-300 mb-1">
               <span className="font-medium">Sender:</span> {parcel.sender}
             </p>
-            <p className="text-gray-700 mb-1">
+            <p className="text-gray-700 dark:text-gray-300 mb-1">
               <span className="font-medium">Recipient:</span> {parcel.recipient}
             </p>
-            <p className="text-gray-700 mb-1">
+            <p className="text-gray-700 dark:text-gray-300 mb-1">
               <span className="font-medium">Weight:</span> {parcel.weight} kg
             </p>
-            <p className="text-gray-700 mb-1">
+            <p className="text-gray-700 dark:text-gray-300 mb-1">
               <span className="font-medium">Description:</span> {parcel.description}
             </p>
             <p
@@ -188,11 +187,11 @@ const Catalog: React.FC = () => {
             <button
               key={i}
               onClick={() => paginate(i + 1)}
-              className={`px-4 py-2 rounded-lg ${
+              className={`px-4 py-2 rounded-lg transition duration-300 ${
                 currentPage === i + 1
                   ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-gray-700"
-              } hover:bg-blue-400 transition duration-300`}
+                  : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white"
+              } hover:bg-blue-400`}
               aria-label={`Go to page ${i + 1}`}
             >
               {i + 1}
@@ -207,7 +206,7 @@ const Catalog: React.FC = () => {
           id="modal"
           className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
         >
-          <div className="bg-white p-6 rounded-lg w-1/2">
+          <div className="bg-white dark:bg-gray-800 dark:text-white p-6 rounded-lg w-11/12 md:w-1/2">
             <h2 className="text-2xl font-semibold mb-4">Parcel Details</h2>
             <p><strong>Tracking Number:</strong> {selectedParcel.tracking_number}</p>
             <p><strong>Sender:</strong> {selectedParcel.sender}</p>
@@ -219,7 +218,7 @@ const Catalog: React.FC = () => {
               <h3 className="font-medium text-lg">History:</h3>
               <ul>
                 {selectedParcel.history.map((update, idx) => (
-                  <li key={idx} className="text-sm text-gray-600">
+                  <li key={idx} className="text-sm text-gray-600 dark:text-gray-300">
                     <span className="font-semibold">{update.status}:</span>{" "}
                     {update.description} at {update.location} (
                     {new Date(update.timestamp).toLocaleString()})

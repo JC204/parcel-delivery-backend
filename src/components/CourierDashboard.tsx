@@ -170,16 +170,28 @@ export function CourierDashboard({ courierId, onLogout }: CourierDashboardProps)
                     <p className="text-sm text-gray-500">
                       {parcel.sender.name} → {parcel.recipient.name}
                     </p>
-                    <div className="mt-2">{getStatusBadge(current)}</div>
+                    <div className="mt-2 flex flex-col gap-1">
+                      {getStatusBadge(current)}
+                      {parcel.estimated_delivery && (
+                    <p className="text-xs text-gray-500">
+                        Est. delivery: {new Date(parcel.estimated_delivery).toLocaleDateString()}
+                     </p>
+                       )}
+                   </div>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium text-gray-700">
-                      {parcel.recipient.address}
-                    </p>
-                    <p className="text-xs text-gray-500">{parcel.recipient.phone}</p>
+                       {parcel.recipient.address}
+                     </p>
+                     <p className="text-xs text-gray-500">{parcel.recipient.phone}</p>
+                      {latest.timestamp && (
+                     <p className="text-xs text-gray-400 mt-1">
+                       Updated: {new Date(latest.timestamp).toLocaleString()}
+                     </p>
+                      )}
                   </div>
+                
                 </div>
-
                 {next.length > 0 && (
                   <div className="mt-4 pt-3 border-t">
                     <p className="text-xs text-gray-500 mb-2">Update Status:</p>
