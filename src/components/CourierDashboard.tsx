@@ -14,7 +14,7 @@ import { motion } from 'framer-motion';
 interface CourierDashboardProps {
   courierId: string;
   onLogout: () => void;
-  demoParcels?: {
+  demoParcels: {
     trackingNumber: string;
     sender: string;
     recipient: string;
@@ -23,15 +23,12 @@ interface CourierDashboardProps {
   }[];
 }
 
+
 export function CourierDashboard({ courierId, onLogout }: CourierDashboardProps) {
   const [parcels, setParcels] = useState<Parcel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchParcels();
-  }, [courierId]);
 
   const fetchParcels = async () => {
     setLoading(true);
@@ -45,6 +42,10 @@ export function CourierDashboard({ courierId, onLogout }: CourierDashboardProps)
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchParcels();
+  }, [courierId]);
 
   const handleStatusUpdate = async (
     parcelId: string,
@@ -217,3 +218,5 @@ export function CourierDashboard({ courierId, onLogout }: CourierDashboardProps)
     </motion.div>
   );
 }
+
+export default CourierDashboard;

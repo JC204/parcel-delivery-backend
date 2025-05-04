@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { API_URL } from "../api/index"; // Adjust path if needed
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
+
 
 interface Parcel {
   tracking_number: string;
@@ -61,20 +63,26 @@ const Catalog: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedParcel, setSelectedParcel] = useState<Parcel | null>(null);
   const parcelsPerPage = 5;
+  const [loading, setLoading] = useState(false);
+
 
   useEffect(() => {
     fetchParcels();
   }, []);
 
   const fetchParcels = async () => {
+    setLoading(true);
     try {
       const response = await axios.get(`${API_URL}/parcels`);
       setParcels(response.data);
     } catch (error) {
       console.error("Error fetching parcels:", error);
       setParcels(generateRandomParcels(10));
+    } finally {
+      setLoading(false);
     }
   };
+  
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
@@ -111,16 +119,29 @@ const Catalog: React.FC = () => {
     <div className="container mx-auto p-6" onClick={handleOutsideClick}>
       <h1 className="text-3xl font-bold mb-6 text-center">Parcel Catalog 📦</h1>
 
-      <div className="flex justify-center mb-6">
-        <input
-          type="text"
-          placeholder="Search parcels..."
-          value={search}
-          onChange={handleSearchChange}
-          className="border border-gray-300 rounded-lg p-2 w-64 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-          aria-label="Search parcels"
-        />
-      </div>
+      <div className="flex justify-center items-center gap-3 mb-6">
+  <input
+    type="text"
+    placeholder="Search parcels..."
+    value={search}
+    onChange={handleSearchChange}
+    className="border border-gray-300 rounded-lg p-2 w-64 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+    aria-label="Search parcels"
+  />
+  <button
+    onClick={fetchParcels}
+    className="flex items-center gap-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 shadow-sm transition"
+    aria-label="Refresh parcel list"
+    disabled={loading}
+  >
+    <ArrowPathIcon className={`h-5 w-5 ${loading ? "animate-spin" : ""}`} />
+    Refresh
+  </button>
+  {loading && (
+    <span className="text-gray-600 text-sm animate-pulse">Loading parcels...</span>
+  )}
+</div>
+
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {currentParcels.map((parcel, index) => (

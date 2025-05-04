@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import ParcelForm from './components/ParcelForm';
 import TrackingPage from './components/ParcelTracker';
 import { CourierLogin } from './components/CourierLogin';
 import { CourierDashboard } from './components/CourierDashboard';
-import { Package, Truck, Search } from 'lucide-react';
-
+import Homepage from './components/Homepage';
+import Navbar from './components/Navbar';
+import Catalog from "./components/Catalog";
 
 
 const AppContent = ({
@@ -55,9 +56,11 @@ const AppContent = ({
         transition={{ duration: 0.3 }}
       >
         <Routes location={location}>
-          <Route path="/" element={<ParcelForm />} />
+        <Route path="/create" element={<ParcelForm />} />
           <Route path="/track" element={<TrackingPage />} />
           <Route path="/track/:trackingNumber" element={<TrackingPage />} />
+          <Route path="/" element={<Homepage />} />
+          <Route path="/catalog" element={<Catalog />} />
           <Route
             path="/courier"
             element={
@@ -96,35 +99,11 @@ function App() {
     localStorage.removeItem('courierId');
   };
 
-  const navLinks = [
-    { to: '/', label: 'Ship', icon: <Package className="h-4 w-4 mr-2" /> },
-    { to: '/track', label: 'Track', icon: <Search className="h-4 w-4 mr-2" /> },
-    { to: '/courier', label: 'Courier', icon: <Truck className="h-4 w-4 mr-2" /> },
-  ];
 
   return (
     <Router>
       <div className="min-h-screen flex flex-col bg-gray-50">
-        <header className="bg-blue-600 text-white shadow-md">
-          <div className="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center mb-4 md:mb-0">
-              <Package className="h-8 w-8 mr-2" />
-              <h1 className="text-2xl font-bold">ParcelPro</h1>
-            </div>
-            <nav className="flex flex-wrap gap-2 md:gap-4">
-              {navLinks.map(({ to, label, icon }) => (
-                <Link
-                  key={to}
-                  to={to}
-                  className="px-3 py-2 rounded hover:bg-blue-700 transition-colors flex items-center"
-                >
-                  {icon}
-                  <span>{label}</span>
-                </Link>
-              ))}
-            </nav>
-          </div>
-        </header>
+      <Navbar courierId={courierId} logout={handleCourierLogout}/>
 
         <main className="container mx-auto px-4 py-8 flex-grow">
           <AppContent

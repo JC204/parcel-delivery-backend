@@ -30,7 +30,8 @@ export async function getCouriers(): Promise<Courier[]> {
 export async function getParcelsByCourier(courierId: string): Promise<Parcel[]> {
   const res = await fetch(`${API_URL}/couriers/${courierId}/parcels`);
   if (!res.ok) throw new Error("Failed to fetch courier parcels");
-  return res.json();
+  const data: Parcel[] = await res.json(); // Explicitly cast to Parcel[]
+  return data;
 }
 
 export async function updateParcelStatus(
@@ -45,6 +46,20 @@ export async function updateParcelStatus(
   if (!res.ok) throw new Error("Failed to update parcel status");
   return res.json();
 }
+
+export async function loginCourier(courierId: string, password: string): Promise<Courier> {
+  const res = await fetch(`${API_URL}/couriers/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ courier_id: courierId, password }),
+  });
+  if (!res.ok) {
+    const message = await res.text();
+    throw new Error(message || "Login failed");
+  }
+  return res.json();
+}
+
 
 export async function createTestParcel(): Promise<Parcel> {
   const res = await fetch(`${API_URL}/test/create-parcel`, {

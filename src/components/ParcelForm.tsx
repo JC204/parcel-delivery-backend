@@ -5,18 +5,33 @@ import { motion, AnimatePresence } from "framer-motion";
 
 interface Parcel {
   sender: string;
+  sender_phone: string;
+  sender_address: string;
+  sender_email: string;
   recipient: string;
+  recipient_phone: string;
+  recipient_address: string;
+  recipient_email: string;
   weight: number;
   description: string;
 }
 
+
 const ParcelForm: React.FC = () => {
   const [parcel, setParcel] = useState<Parcel>({
     sender: "",
+    sender_phone: "",
+    sender_address: "",
+    sender_email: "",
     recipient: "",
+    recipient_phone: "",
+    recipient_address: "",
+    recipient_email: "",
     weight: 0,
     description: "",
   });
+  
+
   const [submitted, setSubmitted] = useState(false);
   const [trackingNumber, setTrackingNumber] = useState("");
 
@@ -31,7 +46,25 @@ const ParcelForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/parcels", parcel);
+      const payload = {
+        sender: {
+          name: parcel.sender,
+          phone: parcel.sender_phone,
+          address: parcel.sender_address,
+          email: parcel.sender_email,
+        },
+        recipient: {
+          name: parcel.recipient,
+          phone: parcel.recipient_phone,
+          address: parcel.recipient_address,
+          email: parcel.recipient_email,
+        },
+        weight: parcel.weight,
+        description: parcel.description,
+      };
+      
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/parcels`, payload);
+      
       setTrackingNumber(response.data.tracking_number);
       setSubmitted(true);
     } catch (error) {
@@ -43,13 +76,20 @@ const ParcelForm: React.FC = () => {
   const resetForm = () => {
     setParcel({
       sender: "",
+      sender_phone: "",
+      sender_address: "",
+      sender_email: "",        
       recipient: "",
+      recipient_phone: "",
+      recipient_address: "",
+      recipient_email: "",     
       weight: 0,
       description: "",
     });
     setTrackingNumber("");
     setSubmitted(false);
   };
+  
 
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-2xl shadow-lg">
@@ -77,6 +117,25 @@ const ParcelForm: React.FC = () => {
             />
             <input
               type="text"
+              name="sender_phone"
+              value={parcel.sender_phone}
+              onChange={handleChange}
+              placeholder="Sender Phone"
+              className="w-full p-2 border border-gray-300 rounded"
+              required
+            />
+            <input
+              type="text"
+              name="sender_address"
+              value={parcel.sender_address}
+              onChange={handleChange}
+              placeholder="Sender Address"
+              className="w-full p-2 border border-gray-300 rounded"
+              required
+            />
+
+            <input
+              type="text"
               name="recipient"
               value={parcel.recipient}
               onChange={handleChange}
@@ -84,6 +143,44 @@ const ParcelForm: React.FC = () => {
               className="w-full p-2 border border-gray-300 rounded"
               required
             />
+            <input
+              type="text"
+              name="recipient_phone"
+              value={parcel.recipient_phone}
+              onChange={handleChange}
+              placeholder="Recipient Phone"
+              className="w-full p-2 border border-gray-300 rounded"
+              required
+            />
+            <input
+              type="text"
+              name="recipient_address"
+              value={parcel.recipient_address}
+              onChange={handleChange}
+              placeholder="Recipient Address"
+              className="w-full p-2 border border-gray-300 rounded"
+              required
+            />
+            <input
+             type="email"
+             name="sender_email"
+             value={parcel.sender_email}
+             onChange={handleChange}
+             placeholder="Sender Email"
+             className="w-full p-2 border border-gray-300 rounded"
+             required
+            />
+
+            <input
+            type="email"
+            name="recipient_email"
+            value={parcel.recipient_email}
+            onChange={handleChange}
+            placeholder="Recipient Email"
+            className="w-full p-2 border border-gray-300 rounded"
+            required
+            />
+
             <input
               type="number"
               name="weight"
