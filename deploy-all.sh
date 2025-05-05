@@ -108,8 +108,10 @@ fi
 echo -e "${GREEN}✅ Frontend build successful.${NC}"
 
 # Deploy to Netlify from dist/ (Vite output)
-echo -e "${GREEN}👉 Deploying to Netlify...${NC}"
-netlify deploy --prod --dir="$FRONTEND_DIR/dist" > /dev/null 2>&1 &
+echo -e "${GREEN}👉 Setting VITE_API_URL for build time...${NC}"
+export VITE_API_URL=$NGROK_URL
+echo -e "${GREEN}👉 Building frontend with injected VITE_API_URL...${NC}"
+npm run build > /dev/null 2>&1 &
 spinner
 DEPLOY_STATUS=$?
 
