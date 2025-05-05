@@ -21,7 +21,7 @@ CORS(app, supports_credentials=True, origins=[
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-unsafe')
 
 # Database config
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('sqlite:///parcel_delivery.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///parcel_delivery.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
