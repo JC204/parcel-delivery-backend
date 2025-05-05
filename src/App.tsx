@@ -60,12 +60,10 @@ const AppContent = ({
 };
 
 function App() {
-  const [courierId, setCourierId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const storedId = localStorage.getItem('courierId');
-    if (storedId) setCourierId(storedId);
-  }, []);
+  const [courierId, setCourierId] = useState<string | null>(() => {
+    return localStorage.getItem('courierId') || null;
+  });
+  
 
   const handleCourierLogin = (id: string) => {
     setCourierId(id);

@@ -40,6 +40,8 @@ export function CourierDashboard({ courierId, onLogout }: CourierDashboardProps)
   };
 
   useEffect(() => {
+    if (!courierId) return; // Don't run if courierId is missing
+  
     async function fetchParcels() {
       try {
         const response = await fetch(`${API_URL}/couriers/${courierId}/parcels`);
@@ -48,7 +50,7 @@ export function CourierDashboard({ courierId, onLogout }: CourierDashboardProps)
         setParcels(data);
       } catch (error) {
         console.error('Failed to fetch parcels. Using demo data.', error);
-        setParcels(demoParcels); // Fallback here
+        setParcels(demoParcels); // fallback
       } finally {
         setLoading(false);
       }
@@ -56,6 +58,7 @@ export function CourierDashboard({ courierId, onLogout }: CourierDashboardProps)
   
     fetchParcels();
   }, [courierId]);
+  
   
   const handleStatusUpdate = async (
     parcelId: string,
