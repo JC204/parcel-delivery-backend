@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { CourierLogin } from './CourierLogin';
 import { CourierDashboard } from './CourierDashboard';
 import { AnimatePresence, motion } from 'framer-motion';
-import { demoParcels } from 'demoParcels'
+import { demoParcels } from '../demoParcels'
 
 export function CourierDashboardWrapper() {
   const [courierId, setCourierId] = useState<string | null>(null);
