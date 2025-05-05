@@ -90,6 +90,14 @@ echo -e "${GREEN}✅ API URL pushed to GitHub.${NC}"
 echo -e "${GREEN}⌛ Waiting 10 seconds for GitHub/Netlify to sync...${NC}"
 sleep 10
 
+# === Sync Netlify environment variable ===
+echo -e "${GREEN}👉 Syncing VITE_API_URL with Netlify...${NC}"
+netlify env:set VITE_API_URL "$NGROK_URL" --site comforting-syrniki-99725d
+echo -e "${GREEN}✅ Netlify env var set to $NGROK_URL.${NC}"
+
+echo -e "${GREEN}⌛ Waiting 10 seconds for GitHub/Netlify to sync...${NC}"
+sleep 10
+
 echo -e "${GREEN}👉 Building frontend...${NC}"
 npm run build > /dev/null 2>&1 &
 spinner
