@@ -38,7 +38,8 @@ const AppContent = ({
           <Route path="/track/:trackingNumber" element={<TrackingPage />} />
           <Route path="/" element={<Homepage />} />
           <Route path="/catalog" element={<Catalog />} />
-          <Route
+          <Route path="/dashboard" element={<CourierWrapper />} />
+         <Route
             path="/courier"
             element={
               courierId ? (

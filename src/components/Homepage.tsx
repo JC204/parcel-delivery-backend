@@ -16,7 +16,7 @@ const Homepage = () => {
       label: 'Track a Parcel',
       description: 'Track the status and journey of a package.',
       icon: <PackageSearch className="h-6 w-6 text-blue-400" />,
-      route: '/',
+      route: '/track',
     },
     {
       label: 'Create Shipment',
@@ -31,11 +31,12 @@ const Homepage = () => {
       route: '/catalog',
     },
     {
-      label: 'Courier Dashboard',
-      description: 'Log in to manage and update deliveries.',
+      label: 'Courier Demo',
+      description: 'Try out the dashboard as a guest courier.',
       icon: <UserCheck className="h-6 w-6 text-pink-400" />,
-      route: '/dashboard',
-    },
+      route: '/dashboard', // <- this stays
+    }
+    ,
   ];
 
   return (

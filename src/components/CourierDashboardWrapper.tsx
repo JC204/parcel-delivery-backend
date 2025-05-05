@@ -22,7 +22,9 @@ export function CourierWrapper() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -16 }}
             transition={{ duration: 0.4 }}
-          >
+          ><h2 className="text-lg font-semibold text-gray-700 mb-4">
+          Demo Courier Dashboard (Session will reset on refresh)
+        </h2>
             <CourierDashboard
               courierId={courierId}
               onLogout={() => {
