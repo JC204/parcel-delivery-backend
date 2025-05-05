@@ -7,6 +7,7 @@ export function CourierWrapper() {
   const [courierId, setCourierId] = useState<string | null>(null);
 
   const handleLogin = (id: string) => {
+    console.log("Courier logged in with ID:", id);
     setCourierId(id);
   };
 
@@ -22,10 +23,13 @@ export function CourierWrapper() {
             transition={{ duration: 0.4 }}
           >
             <CourierDashboard
-  courierId={courierId}
-  onLogout={() => setCourierId(null)}
-  demoParcels={[]} // if you’re still passing demoParcels
-/>
+              courierId={courierId}
+              onLogout={() => {
+                console.log("Courier logged out.");
+                setCourierId(null);
+              }}
+              demoParcels={[]} // optional if you're not using fallback data
+            />
           </motion.div>
         ) : (
           <motion.div

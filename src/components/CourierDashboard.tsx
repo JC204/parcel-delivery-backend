@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getParcelsByCourier, updateParcelStatus } from '../api';
+import { API_URL } from '../api';
+import { demoParcels } from '../demoParcels'; // or wherever you saved them
 import { Parcel, TrackingUpdate } from '../types';
 import {
   Loader2,
@@ -44,9 +46,23 @@ export function CourierDashboard({ courierId, onLogout }: CourierDashboardProps)
   };
 
   useEffect(() => {
+    async function fetchParcels() {
+      try {
+        const response = await fetch(`${API_URL}/couriers/${courierId}/parcels`);
+        if (!response.ok) throw new Error('Network error');
+        const data = await response.json();
+        setParcels(data);
+      } catch (error) {
+        console.error('Failed to fetch parcels. Using demo data.', error);
+        setParcels(demoParcels); // Fallback here
+      } finally {
+        setLoading(false);
+      }
+    }
+  
     fetchParcels();
   }, [courierId]);
-
+  
   const handleStatusUpdate = async (
     parcelId: string,
     status: string,
