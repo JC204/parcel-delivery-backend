@@ -4,19 +4,19 @@ export const demoParcels: Parcel[] = [
   {
     tracking_number: 'TRKDEMO001',
     sender: {
-      name: 'Alice Sender',
-      email: 'alice.sender@example.com',
-      phone: '555-1111',
-      address: '123 Sender Lane',
-    },
-    recipient: {
-      name: 'Alice Smith',
-      email: 'alice@example.com',
+      name: 'John Doe',
+      email: 'john.doe@example.com',
       phone: '555-1234',
       address: '123 Main St',
     },
+    recipient: {
+      name: 'Jane Smith',
+      email: 'jane.smith@example.com',
+      phone: '555-5678',
+      address: '456 Maple Ave',
+    },
     courier_id: 'CR001',
-    courier_name: 'John Doe',
+    courier_name: 'Courier A',
     status: 'in transit',
     estimated_delivery: '2025-05-07T16:00:00Z',
     tracking_history: [
@@ -31,21 +31,21 @@ export const demoParcels: Parcel[] = [
   {
     tracking_number: 'TRKDEMO002',
     sender: {
-      name: 'Bob Sender',
-      email: 'bob.sender@example.com',
-      phone: '555-2222',
-      address: '456 Sender Ave',
+      name: 'Alice Sender',
+      email: 'alice@example.com',
+      phone: '555-8765',
+      address: '789 Sender Blvd',
     },
     recipient: {
       name: 'Bob Johnson',
       email: 'bob@example.com',
-      phone: '555-5678',
-      address: '456 Market St',
+      phone: '555-4321',
+      address: '321 Receiver Rd',
     },
     courier_id: 'CR002',
-    courier_name: 'Jane Smith',
+    courier_name: 'Courier B',
     status: 'delivered',
-    estimated_delivery: '2025-05-07T18:00:00Z',
+    estimated_delivery: '2025-05-08T14:30:00Z',
     tracking_history: [
       {
         status: 'out for delivery',

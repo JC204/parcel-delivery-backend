@@ -8,7 +8,9 @@ import { CourierDashboard } from './components/CourierDashboard';
 import Homepage from './components/Homepage';
 import Navbar from './components/Navbar';
 import Catalog from "./components/Catalog";
-
+import { demoParcels } from './demoParcels'; // <== Import the correct demo data
+import { Parcel } from './types';
+import { CourierWrapper } from 'components/CourierDashboardWrapper';
 
 const AppContent = ({
   courierId,
@@ -21,31 +23,6 @@ const AppContent = ({
 }) => {
   const location = useLocation();
 
-  // Sample demo data for parcels (mimicking a real-world response from your backend)
-  const demoParcels = [
-    {
-      trackingNumber: '123456',
-      sender: 'John Doe',
-      recipient: 'Jane Smith',
-      description: 'Laptop, fragile',
-      status: 'Shipped',
-    },
-    {
-      trackingNumber: '654321',
-      sender: 'Mary Johnson',
-      recipient: 'James Williams',
-      description: 'Books, medium weight',
-      status: 'In Transit',
-    },
-    {
-      trackingNumber: '789012',
-      sender: 'Robert Brown',
-      recipient: 'Michael Davis',
-      description: 'Clothes, large box',
-      status: 'Delivered',
-    },
-  ];
-
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -56,7 +33,7 @@ const AppContent = ({
         transition={{ duration: 0.3 }}
       >
         <Routes location={location}>
-        <Route path="/create" element={<ParcelForm />} />
+          <Route path="/create" element={<ParcelForm />} />
           <Route path="/track" element={<TrackingPage />} />
           <Route path="/track/:trackingNumber" element={<TrackingPage />} />
           <Route path="/" element={<Homepage />} />
@@ -68,7 +45,7 @@ const AppContent = ({
                 <CourierDashboard
                   courierId={courierId}
                   onLogout={handleCourierLogout}
-                  demoParcels={demoParcels} // Passing demo data to CourierDashboard
+                  demoParcels={demoParcels} // Now using imported demoParcels
                 />
               ) : (
                 <CourierLogin onLogin={handleCourierLogin} />
@@ -99,12 +76,10 @@ function App() {
     localStorage.removeItem('courierId');
   };
 
-
   return (
     <Router>
       <div className="min-h-screen flex flex-col bg-gray-50">
-      <Navbar courierId={courierId} logout={handleCourierLogout}/>
-
+        <Navbar courierId={courierId} logout={handleCourierLogout} />
         <main className="container mx-auto px-4 py-8 flex-grow">
           <AppContent
             courierId={courierId}
@@ -112,7 +87,6 @@ function App() {
             handleCourierLogout={handleCourierLogout}
           />
         </main>
-
         <footer className="bg-gray-100 border-t py-6">
           <div className="container mx-auto text-center text-gray-600 text-sm">
             &copy; {new Date().getFullYear()} ParcelPro Delivery System
