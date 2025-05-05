@@ -8,6 +8,7 @@ import string
 from models import db, Customer, Courier, Parcel, TrackingUpdate
 from dotenv import load_dotenv  # ✅ For .env support
 from database import db
+from parcels import parcels_bp
 
 
 load_dotenv()  # ✅ Load environment variables from .env
@@ -21,6 +22,8 @@ CORS(app, supports_credentials=True, origins=[
 
 # ✅ Secure session handling
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-unsafe')
+
+app.register_blueprint(parcels_bp)  #
 
 # Database config
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///parcel_delivery.db'
