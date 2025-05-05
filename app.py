@@ -7,6 +7,8 @@ import random
 import string
 from models import db, Customer, Courier, Parcel, TrackingUpdate
 from dotenv import load_dotenv  # ✅ For .env support
+from database import db
+
 
 load_dotenv()  # ✅ Load environment variables from .env
 
