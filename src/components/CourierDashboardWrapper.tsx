@@ -4,7 +4,7 @@ import { CourierDashboard } from './CourierDashboard';
 import { AnimatePresence, motion } from 'framer-motion';
 import { demoParcels } from 'demoParcels';
 
-export function CourierWrapper() {
+export function CourierDashboardWrapper() {
   const [courierId, setCourierId] = useState<string | null>(null);
 
   const handleLogin = (id: string) => {

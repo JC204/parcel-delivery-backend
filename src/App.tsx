@@ -10,7 +10,7 @@ import Navbar from './components/Navbar';
 import Catalog from "./components/Catalog";
 import { demoParcels } from './demoParcels'; // <== Import the correct demo data
 import { Parcel } from './types';
-import { CourierWrapper } from 'components/CourierDashboardWrapper';
+import  {CourierDashboardWrapper} from './components/CourierDashboardWrapper';
 
 const AppContent = ({
   courierId,
@@ -38,7 +38,8 @@ const AppContent = ({
           <Route path="/track/:trackingNumber" element={<TrackingPage />} />
           <Route path="/" element={<Homepage />} />
           <Route path="/catalog" element={<Catalog />} />
-          <Route path="/dashboard" element={<CourierWrapper />} />
+          <Route path="/dashboard" element={<CourierDashboardWrapper />} />
+          <Route path="/courier/dashboard" element={<CourierDashboardWrapper />} />
          <Route
             path="/courier"
             element={
