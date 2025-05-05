@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -10,6 +11,7 @@ import {
 
 const Homepage = () => {
   const navigate = useNavigate();
+  const [trackingNumber, setTrackingNumber] = useState('');
 
   const links = [
     {
@@ -34,9 +36,8 @@ const Homepage = () => {
       label: 'Courier Demo',
       description: 'Try out the dashboard as a guest courier.',
       icon: <UserCheck className="h-6 w-6 text-pink-400" />,
-      route: '/dashboard', // <- this stays
-    }
-    ,
+      route: '/dashboard',
+    },
   ];
 
   return (
@@ -59,6 +60,7 @@ const Homepage = () => {
       >
         Welcome to ParcelSwift
       </motion.h1>
+
       <p className="text-gray-400 mb-10 text-center max-w-lg">
         A smart parcel delivery platform for real-time tracking, shipment management, and courier updates.
       </p>
@@ -67,15 +69,46 @@ const Homepage = () => {
         {links.map(({ label, description, icon, route }) => (
           <motion.div
             key={label}
-            onClick={() => navigate(route)}
             whileHover={{ scale: 1.05 }}
             className="cursor-pointer bg-gray-800 p-6 rounded-xl border border-gray-700 hover:bg-gray-700 transition"
+            onClick={() => {
+              if (label !== 'Track a Parcel') {
+                navigate(route);
+              }
+            }}
           >
             <div className="flex items-center gap-4 mb-3">
               {icon}
               <h3 className="text-lg font-semibold">{label}</h3>
             </div>
             <p className="text-gray-400 text-sm">{description}</p>
+
+            {label === 'Track a Parcel' && (
+              <form
+                className="mt-4 flex gap-2"
+                onClick={(e) => e.stopPropagation()}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (trackingNumber.trim()) {
+                    navigate(`/track/${trackingNumber.trim()}`);
+                  }
+                }}
+              >
+                <input
+                  type="text"
+                  placeholder="Enter tracking number"
+                  value={trackingNumber}
+                  onChange={(e) => setTrackingNumber(e.target.value)}
+                  className="flex-grow px-3 py-2 rounded-md text-black"
+                />
+                <button
+                  type="submit"
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                >
+                  Track
+                </button>
+              </form>
+            )}
           </motion.div>
         ))}
       </div>

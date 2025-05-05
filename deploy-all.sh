@@ -40,60 +40,56 @@ cd "$PROJECT_DIR"
 FLASK_APP=app.py flask run --host=0.0.0.0 --port=5000 > flask.log 2>&1 &
 FLASK_PID=$!
 
-# Wait for Flask to start
 sleep 2
 
 echo -e "${GREEN}👉 Starting ngrok tunnel...${NC}"
 ngrok http 5000 > ngrok.log &
 NGROK_PID=$!
 
-# Wait for ngrok to initialize
 sleep 3 &
 spinner
 
-# Fetch ngrok URL
-NGROK_URL=$(curl --silent http://127.0.0.1:4040/api/tunnels | grep -o 'https://[^"]*')
+# === Fetch and validate ngrok URL ===
+NGROK_URL=$(curl --silent http://127.0.0.1:4040/api/tunnels | grep -o 'https://[^"]*' | head -n 1)
 
 if [ -z "$NGROK_URL" ]; then
-  echo -e "${RED}❌ Failed to fetch ngrok URL. Aborting.${NC}"
+  echo -e "${RED}❌ Could not fetch ngrok URL. Aborting.${NC}"
   kill -9 $FLASK_PID $NGROK_PID
   exit 1
 fi
 
 echo -e "${GREEN}✅ ngrok URL is: $NGROK_URL${NC}"
+echo -e "${GREEN}👉 Opening ngrok status page for confirmation...${NC}"
+open http://127.0.0.1:4040
 
-echo -e "${GREEN}👉 Verifying backend is reachable at $NGROK_URL...${NC}"
+# === Add helpful test curl command ===
+echo -e "${GREEN}👉 Testing backend via: curl ${NGROK_URL}/couriers${NC}"
 HEALTH_CHECK=$(curl --silent --max-time 5 "$NGROK_URL/couriers" | grep -o 'CR00[1-9]')
 
 if [ -z "$HEALTH_CHECK" ]; then
-  echo -e "${RED}❌ Backend is not responding properly. Check Flask or ngrok logs.${NC}"
+  echo -e "${RED}❌ Backend is not responding properly at ${NGROK_URL}/couriers${NC}"
+  echo -e "${RED}Check 'flask.log' and 'ngrok.log' for more details.${NC}"
   kill -9 $FLASK_PID $NGROK_PID
   exit 1
 fi
+echo -e "${GREEN}✅ Backend is reachable and responding correctly.${NC}"
 
-echo -e "${GREEN}✅ Backend is reachable and responding.${NC}"
-
-
-# Backup original API line in .env
+# === Update .env ===
 ORIGINAL_API_LINE=$(grep "VITE_API_URL" "$ENV_FILE")
-
 echo -e "${GREEN}👉 Updating API URL in: $ENV_FILE...${NC}"
 sed -i '' "s|VITE_API_URL=.*|VITE_API_URL=${NGROK_URL}|" "$ENV_FILE"
 echo -e "${GREEN}✅ API URL set to ngrok.${NC}"
 
-# Commit and push updated API URL to GitHub
-echo -e "${GREEN}👉 Committing updated API URL to GitHub...${NC}"
+# === Git push updated env ===
 cd "$FRONTEND_DIR"
 git add "$ENV_FILE"
 git commit -m "Set VITE_API_URL to $NGROK_URL for Netlify deploy"
 git push origin main
 echo -e "${GREEN}✅ API URL pushed to GitHub.${NC}"
 
-# Optional wait for GitHub to sync before build
 echo -e "${GREEN}⌛ Waiting 10 seconds for GitHub/Netlify to sync...${NC}"
 sleep 10
 
-# Build frontend
 echo -e "${GREEN}👉 Building frontend...${NC}"
 npm run build > /dev/null 2>&1 &
 spinner
@@ -107,10 +103,10 @@ if [ $BUILD_STATUS -ne 0 ]; then
 fi
 echo -e "${GREEN}✅ Frontend build successful.${NC}"
 
-# Deploy to Netlify from dist/ (Vite output)
+# === Redundant build for environment variable support ===
 echo -e "${GREEN}👉 Setting VITE_API_URL for build time...${NC}"
 export VITE_API_URL=$NGROK_URL
-echo -e "${GREEN}👉 Building frontend with injected VITE_API_URL...${NC}"
+echo -e "${GREEN}👉 Building frontend again with injected VITE_API_URL...${NC}"
 npm run build > /dev/null 2>&1 &
 spinner
 DEPLOY_STATUS=$?
@@ -122,7 +118,7 @@ if [ $DEPLOY_STATUS -ne 0 ]; then
 fi
 echo -e "${GREEN}✅ Netlify deployment successful.${NC}"
 
-# Restore original API URL in .env
+# === Revert API URL ===
 echo -e "${GREEN}👉 Restoring local API URL...${NC}"
 sed -i '' "s|VITE_API_URL=.*|VITE_API_URL=${LOCAL_API_URL}|" "$ENV_FILE"
 git add "$ENV_FILE"
@@ -130,7 +126,7 @@ git commit -m "Revert VITE_API_URL back to localhost"
 git push origin main
 echo -e "${GREEN}✅ API URL restored to localhost and pushed.${NC}"
 
-# Final display
+# === Final Summary ===
 echo ""
 echo -e "${GREEN}✅ Everything deployed successfully!${NC}"
 echo -e "${GREEN}Backend (ngrok): ${NGROK_URL}${NC}"

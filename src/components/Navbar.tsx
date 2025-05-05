@@ -13,7 +13,7 @@ const Navbar = ({ courierId, logout }: NavbarProps) => {
   return (
     <nav className="flex items-center space-x-6 bg-white shadow-md py-4 px-6">
       <NavLink
-        to="/"
+        to="/track"
         className={({ isActive }) =>
           isActive ? `${linkClass} ${activeClass}` : linkClass
         }
