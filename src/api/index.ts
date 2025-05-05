@@ -7,6 +7,8 @@ export async function trackParcel(trackingNumber: string): Promise<Parcel> {
   const res = await fetch(`${API_URL}/parcels/track/${trackingNumber}`);
   if (!res.ok) throw new Error("Failed to fetch tracking information");
   return res.json();
+  console.log("API_URL is:", API_URL);
+  console.log("Tracking fetch URL:", `${API_URL}/parcels/track/${trackingNumber}`);  
 }
 
 export async function submitParcel(
