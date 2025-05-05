@@ -4,10 +4,10 @@ import { Parcel, TrackingUpdate, Courier } from '../types';
 export const API_URL = import.meta.env.VITE_API_URL;
 
 export async function trackParcel(trackingNumber: string): Promise<Parcel> {
-  const res = await fetch(`${API_URL}/parcels/track/${trackingNumber}`);
+  const res = await fetch(`${API_URL}/track/${trackingNumber}`);
   if (!res.ok) throw new Error("Failed to fetch tracking information");
    console.log("API_URL is:", API_URL);
-  console.log("Tracking fetch URL:", `${API_URL}/parcels/track/${trackingNumber}`);
+  console.log("Tracking fetch URL:", `${API_URL}/track/${trackingNumber}`);
   return res.json();
     
 }
