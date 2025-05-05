@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { CourierLogin } from './CourierLogin';
 import { CourierDashboard } from './CourierDashboard';
 import { AnimatePresence, motion } from 'framer-motion';
+import { demoParcels } from 'demoParcels';
 
 export function CourierWrapper() {
   const [courierId, setCourierId] = useState<string | null>(null);
@@ -28,7 +29,7 @@ export function CourierWrapper() {
                 console.log("Courier logged out.");
                 setCourierId(null);
               }}
-              demoParcels={[]} // optional if you're not using fallback data
+              demoParcels={demoParcels} // optional if you're not using fallback data
             />
           </motion.div>
         ) : (

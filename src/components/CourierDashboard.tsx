@@ -16,13 +16,7 @@ import { motion } from 'framer-motion';
 interface CourierDashboardProps {
   courierId: string;
   onLogout: () => void;
-  demoParcels: {
-    trackingNumber: string;
-    sender: string;
-    recipient: string;
-    description: string;
-    status: string;
-  }[];
+  demoParcels: Parcel[]; // <- make sure this line ends with a semicolon
 }
 
 
