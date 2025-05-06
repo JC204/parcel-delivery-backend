@@ -91,7 +91,7 @@ echo -e "${GREEN}✅ API URL pushed to GitHub.${NC}"
 
 # === Sync Netlify environment variable ===
 echo -e "${GREEN}👉 Syncing VITE_API_URL with Netlify...${NC}"
-netlify env:set VITE_API_URL "$NGROK_URL" --site comforting-syrniki-99725d
+netlify env:set VITE_API_URL "$NGROK_URL" --site b9f60ec5-6b07-452c-b2de-9e7199dc1ed8
 if [ $? -ne 0 ]; then
   echo -e "${RED}❌ Failed to sync VITE_API_URL with Netlify.${NC}"
   kill -9 $FLASK_PID $NGROK_PID
