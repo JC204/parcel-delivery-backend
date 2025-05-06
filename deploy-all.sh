@@ -62,17 +62,13 @@ echo -e "${GREEN}✅ ngrok URL is: $NGROK_URL${NC}"
 echo -e "${GREEN}👉 Opening ngrok status page for confirmation...${NC}"
 open http://127.0.0.1:4040
 
-# === Add helpful test curl command ===
-echo -e "${GREEN}👉 Testing backend via: curl ${NGROK_URL}/couriers${NC}"
-HEALTH_CHECK=$(curl --silent --max-time 5 "$NGROK_URL/couriers" | grep -o 'CR00[1-9]')
-
-if [ -z "$HEALTH_CHECK" ]; then
-  echo -e "${RED}❌ Backend is not responding properly at ${NGROK_URL}/couriers${NC}"
-  echo -e "${RED}Check 'flask.log' and 'ngrok.log' for more details.${NC}"
-  kill -9 $FLASK_PID $NGROK_PID
-  exit 1
-fi
-echo -e "${GREEN}✅ Backend is reachable and responding correctly.${NC}"
+# === Wait until backend is actually serving valid JSON ===
+echo -e "${GREEN}⌛ Waiting for backend to serve valid JSON from ${NGROK_URL}/couriers...${NC}"
+until curl --silent "$NGROK_URL/couriers" | jq '.' > /dev/null 2>&1; do
+  echo -e "${RED}  Backend not ready yet. Retrying...${NC}"
+  sleep 2
+done
+echo -e "${GREEN}✅ Backend is reachable and serving JSON!${NC}"
 
 # === Update .env ===
 ORIGINAL_API_LINE=$(grep "VITE_API_URL" "$ENV_FILE")
@@ -92,6 +88,10 @@ echo -e "${GREEN}✅ API URL pushed to GitHub.${NC}"
 # === Sync Netlify environment variable ===
 echo -e "${GREEN}👉 Syncing VITE_API_URL with Netlify...${NC}"
 netlify env:set VITE_API_URL "$NGROK_URL" --force
+echo -e "${GREEN}👉 Triggering rebuild on Netlify with empty commit...${NC}"
+git commit --allow-empty -m "Trigger Netlify rebuild for new ngrok URL"
+git push origin main
+
 if [ $? -ne 0 ]; then
   echo -e "${RED}❌ Failed to sync VITE_API_URL with Netlify.${NC}"
   kill -9 $FLASK_PID $NGROK_PID
@@ -153,4 +153,5 @@ open "$NETLIFY_URL"
 echo ""
 echo -e "${GREEN}🚀 Demo is live! Press Ctrl+C to stop Flask and ngrok.${NC}"
 
-wait
+
+ wait
