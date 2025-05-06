@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
   PackageSearch,
   PlusCircle,
@@ -12,28 +12,44 @@ import {
 const Homepage = () => {
   const navigate = useNavigate();
   const [trackingNumber, setTrackingNumber] = useState('');
+  const [courierId, setCourierId] = useState<string | null>(null);
 
-  const links = [
-    {
-      
-      label: 'Create Shipment',
-      description: 'Send a new package to any location.',
-      icon: <PlusCircle className="h-6 w-6 text-green-400" />,
-      route: '/create',
-    },
-    {
-      label: 'View Catalog',
-      description: 'Browse through current and demo parcels.',
-      icon: <ClipboardList className="h-6 w-6 text-yellow-400" />,
-      route: '/catalog',
-    },
-    {
-      label: 'Courier Demo',
-      description: 'Try out the dashboard as a guest courier.',
-      icon: <UserCheck className="h-6 w-6 text-pink-400" />,
-      route: '/dashboard',
-    },
-  ];
+  // Check login status on mount
+  useEffect(() => {
+    const storedId = localStorage.getItem('courierId');
+    setCourierId(storedId);
+  }, []);
+
+  // Define homepage links based on login state
+  const links = courierId
+    ? [
+        {
+          label: 'Go to Dashboard',
+          description: 'Manage deliveries and update parcel status.',
+          icon: <UserCheck className="h-6 w-6 text-pink-400" />,
+          route: '/dashboard',
+        },
+      ]
+    : [
+        {
+          label: 'Create Shipment',
+          description: 'Send a new package to any location.',
+          icon: <PlusCircle className="h-6 w-6 text-green-400" />,
+          route: '/create',
+        },
+        {
+          label: 'View Catalog',
+          description: 'Browse through current and demo parcels.',
+          icon: <ClipboardList className="h-6 w-6 text-yellow-400" />,
+          route: '/catalog',
+        },
+        {
+          label: 'Courier Demo',
+          description: 'Try out the dashboard as a guest courier.',
+          icon: <UserCheck className="h-6 w-6 text-pink-400" />,
+          route: '/dashboard',
+        },
+      ];
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center px-4 py-10">
@@ -47,6 +63,7 @@ const Homepage = () => {
         <CarFront className="h-12 w-12 text-blue-500" />
       </motion.div>
 
+      {/* Welcome Title */}
       <motion.h1
         className="text-4xl font-bold mb-6 text-center"
         initial={{ opacity: 0, y: -10 }}
@@ -56,9 +73,25 @@ const Homepage = () => {
         Welcome to ParcelSwift
       </motion.h1>
 
-      <p className="text-gray-400 mb-10 text-center max-w-lg">
+      <p className="text-gray-400 mb-6 text-center max-w-lg">
         A smart parcel delivery platform for real-time tracking, shipment management, and courier updates.
       </p>
+
+      {/* Optional Logged-in Greeting */}
+      {courierId && (
+        <div className="text-sm text-gray-400 mb-6 text-center">
+          Logged in as Courier <strong>{courierId}</strong>
+          <button
+            className="ml-4 underline text-blue-400 hover:text-blue-300"
+            onClick={() => {
+              localStorage.removeItem('courierId');
+              setCourierId(null);
+            }}
+          >
+            Logout
+          </button>
+        </div>
+      )}
 
       {/* Track Parcel Section */}
       <div id="track" className="bg-gray-800 p-6 rounded-xl mb-8 w-full max-w-md">
@@ -88,7 +121,7 @@ const Homepage = () => {
         </form>
       </div>
 
-      {/* Home Features Section */}
+      {/* Feature Links */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
         {links.map(({ label, description, icon, route }) => (
           <motion.div
