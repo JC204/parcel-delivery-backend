@@ -178,7 +178,9 @@ def update_parcel_status(tracking_number):
 @app.route('/couriers', methods=['GET'])
 def get_couriers():
     couriers = Courier.query.all()
+    print("Couriers in DB:", couriers)  # Check terminal logs
     return jsonify([courier.to_dict() for courier in couriers])
+
 
 @app.route('/couriers/<courier_id>/parcels', methods=['GET'])
 def get_parcels_for_courier(courier_id):

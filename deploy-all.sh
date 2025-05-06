@@ -83,7 +83,7 @@ echo -e "${GREEN}✅ API URL set to ngrok.${NC}"
 # === Git push updated env ===
 cd "$FRONTEND_DIR"
 git add "$ENV_FILE"
-git commit -m "Set VITE_API_URL to $NGROK_URL for Netlify deploy"
+git commit -m "Set VITE_API_URL to $NGROK_URL for Netlify deploy" || echo "ℹ️  Nothing to commit."
 git push origin main
 echo -e "${GREEN}✅ API URL pushed to GitHub.${NC}"
 
