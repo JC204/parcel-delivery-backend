@@ -44,6 +44,7 @@ const AppContent = ({
       >
         <Routes location={location}>
           {/* Public Routes */}
+        
           <Route path="/track" element={<TrackingPage />} />
           <Route path="/track/:tracking_number" element={<TrackingPage />} />
           <Route path="/create" element={<ParcelForm />} />
@@ -118,6 +119,8 @@ function App() {
     setCustomerName(match?.name ?? null);
   };
 
+
+  
   const handleCustomerLogout = () => {
     setCustomerId(null);
     localStorage.removeItem('customerId');
