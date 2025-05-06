@@ -2,69 +2,78 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
+import { Customer } from "../types";
 
-interface Parcel {
-  sender: string;
-  sender_phone: string;
-  sender_address: string;
-  sender_email: string;
-  recipient: string;
-  recipient_phone: string;
-  recipient_address: string;
-  recipient_email: string;
+type ParcelFormState = {
+  sender: Customer;
+  recipient: Customer;
   weight: number;
   description: string;
-}
-
+};
 
 const ParcelForm: React.FC = () => {
-  const [parcel, setParcel] = useState<Parcel>({
-    sender: "",
-    sender_phone: "",
-    sender_address: "",
-    sender_email: "",
-    recipient: "",
-    recipient_phone: "",
-    recipient_address: "",
-    recipient_email: "",
+  const [parcel, setParcel] = useState<ParcelFormState>({
+    sender: {
+      name: "",
+      phone: "",
+      address: "",
+      email: "",
+    },
+    recipient: {
+      name: "",
+      phone: "",
+      address: "",
+      email: "",
+    },
     weight: 0,
     description: "",
   });
-  
 
   const [submitted, setSubmitted] = useState(false);
   const [trackingNumber, setTrackingNumber] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setParcel(prev => ({
-      ...prev,
-      [name]: name === "weight" ? parseFloat(value) || 0 : value,
-    }));
+
+    if (name.startsWith("sender_")) {
+      setParcel((prev) => ({
+        ...prev,
+        sender: {
+          ...prev.sender,
+          [name.replace("sender_", "")]: value,
+        },
+      }));
+    } else if (name.startsWith("recipient_")) {
+      setParcel((prev) => ({
+        ...prev,
+        recipient: {
+          ...prev.recipient,
+          [name.replace("recipient_", "")]: value,
+        },
+      }));
+    } else if (name === "weight") {
+      setParcel((prev) => ({
+        ...prev,
+        weight: parseFloat(value) || 0,
+      }));
+    } else if (name === "description") {
+      setParcel((prev) => ({
+        ...prev,
+        description: value,
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const payload = {
-        sender: {
-          name: parcel.sender,
-          phone: parcel.sender_phone,
-          address: parcel.sender_address,
-          email: parcel.sender_email,
-        },
-        recipient: {
-          name: parcel.recipient,
-          phone: parcel.recipient_phone,
-          address: parcel.recipient_address,
-          email: parcel.recipient_email,
-        },
-        weight: parcel.weight,
-        description: parcel.description,
-      };
-      
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/parcels`, payload);
-      
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/parcels`,
+        parcel
+      );
+
       setTrackingNumber(response.data.tracking_number);
       setSubmitted(true);
     } catch (error) {
@@ -75,21 +84,15 @@ const ParcelForm: React.FC = () => {
 
   const resetForm = () => {
     setParcel({
-      sender: "",
-      sender_phone: "",
-      sender_address: "",
-      sender_email: "",        
-      recipient: "",
-      recipient_phone: "",
-      recipient_address: "",
-      recipient_email: "",     
+      sender: { name: "", phone: "", address: "", email: "" },
+      recipient: { name: "", phone: "", address: "", email: "" },
       weight: 0,
       description: "",
     });
     setTrackingNumber("");
     setSubmitted(false);
   };
-  
+
 
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-2xl shadow-lg">
@@ -106,10 +109,11 @@ const ParcelForm: React.FC = () => {
           >
             <h2 className="text-xl font-bold text-center mb-4">Create a Parcel</h2>
 
+            {/* Sender Inputs */}
             <input
               type="text"
-              name="sender"
-              value={parcel.sender}
+              name="sender_name"
+              value={parcel.sender.name}
               onChange={handleChange}
               placeholder="Sender Name"
               className="w-full p-2 border border-gray-300 rounded"
@@ -118,7 +122,7 @@ const ParcelForm: React.FC = () => {
             <input
               type="text"
               name="sender_phone"
-              value={parcel.sender_phone}
+              value={parcel.sender.phone}
               onChange={handleChange}
               placeholder="Sender Phone"
               className="w-full p-2 border border-gray-300 rounded"
@@ -127,17 +131,27 @@ const ParcelForm: React.FC = () => {
             <input
               type="text"
               name="sender_address"
-              value={parcel.sender_address}
+              value={parcel.sender.address}
               onChange={handleChange}
               placeholder="Sender Address"
               className="w-full p-2 border border-gray-300 rounded"
               required
             />
+            <input
+              type="email"
+              name="sender_email"
+              value={parcel.sender.email}
+              onChange={handleChange}
+              placeholder="Sender Email"
+              className="w-full p-2 border border-gray-300 rounded"
+              required
+            />
 
+            {/* Recipient Inputs */}
             <input
               type="text"
-              name="recipient"
-              value={parcel.recipient}
+              name="recipient_name"
+              value={parcel.recipient.name}
               onChange={handleChange}
               placeholder="Recipient Name"
               className="w-full p-2 border border-gray-300 rounded"
@@ -146,7 +160,7 @@ const ParcelForm: React.FC = () => {
             <input
               type="text"
               name="recipient_phone"
-              value={parcel.recipient_phone}
+              value={parcel.recipient.phone}
               onChange={handleChange}
               placeholder="Recipient Phone"
               className="w-full p-2 border border-gray-300 rounded"
@@ -155,32 +169,24 @@ const ParcelForm: React.FC = () => {
             <input
               type="text"
               name="recipient_address"
-              value={parcel.recipient_address}
+              value={parcel.recipient.address}
               onChange={handleChange}
               placeholder="Recipient Address"
               className="w-full p-2 border border-gray-300 rounded"
               required
             />
+           
             <input
-             type="email"
-             name="sender_email"
-             value={parcel.sender_email}
-             onChange={handleChange}
-             placeholder="Sender Email"
-             className="w-full p-2 border border-gray-300 rounded"
-             required
+              type="email"
+              name="recipient_email"
+              value={parcel.recipient.email}
+              onChange={handleChange}
+              placeholder="Recipient Email"
+              className="w-full p-2 border border-gray-300 rounded"
+              required
             />
 
-            <input
-            type="email"
-            name="recipient_email"
-            value={parcel.recipient_email}
-            onChange={handleChange}
-            placeholder="Recipient Email"
-            className="w-full p-2 border border-gray-300 rounded"
-            required
-            />
-
+            {/* Other Inputs */}
             <input
               type="number"
               name="weight"
@@ -200,6 +206,7 @@ const ParcelForm: React.FC = () => {
               className="w-full p-2 border border-gray-300 rounded"
               required
             />
+
             <button
               type="submit"
               className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"

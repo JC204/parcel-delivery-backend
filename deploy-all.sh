@@ -87,22 +87,27 @@ git commit -m "Set VITE_API_URL to $NGROK_URL for Netlify deploy"
 git push origin main
 echo -e "${GREEN}✅ API URL pushed to GitHub.${NC}"
 
-echo -e "${GREEN}⌛ Waiting 10 seconds for GitHub/Netlify to sync...${NC}"
-sleep 10
+
 
 # === Sync Netlify environment variable ===
 echo -e "${GREEN}👉 Syncing VITE_API_URL with Netlify...${NC}"
 netlify env:set VITE_API_URL "$NGROK_URL" --site comforting-syrniki-99725d
+if [ $? -ne 0 ]; then
+  echo -e "${RED}❌ Failed to sync VITE_API_URL with Netlify.${NC}"
+  kill -9 $FLASK_PID $NGROK_PID
+  exit 1
+fi
 echo -e "${GREEN}✅ Netlify env var set to $NGROK_URL.${NC}"
 
 echo -e "${GREEN}⌛ Waiting 10 seconds for GitHub/Netlify to sync...${NC}"
 sleep 10
 
+# === Build frontend with correct environment variable ===
 echo -e "${GREEN}👉 Building frontend...${NC}"
 npm run build > /dev/null 2>&1 &
 spinner
 BUILD_STATUS=$?
-cd "$PROJECT_DIR"
+
 
 if [ $BUILD_STATUS -ne 0 ]; then
   echo -e "${RED}❌ Frontend build failed.${NC}"

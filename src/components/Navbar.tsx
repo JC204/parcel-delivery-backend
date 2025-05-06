@@ -12,8 +12,20 @@ const Navbar = ({ courierId, logout }: NavbarProps) => {
 
   return (
     <nav className="flex items-center space-x-6 bg-white shadow-md py-4 px-6">
+      {/* Home Link */}
       <NavLink
-        to="/track"
+        to="/"
+        className={({ isActive }) =>
+          isActive ? `${linkClass} ${activeClass}` : linkClass
+        }
+        aria-label="Home"
+      >
+        Home
+      </NavLink>
+
+      {/* Track Parcel Link */}
+      <NavLink
+        to="#track"
         className={({ isActive }) =>
           isActive ? `${linkClass} ${activeClass}` : linkClass
         }
@@ -21,6 +33,8 @@ const Navbar = ({ courierId, logout }: NavbarProps) => {
       >
         Track
       </NavLink>
+
+      {/* Other Links */}
       <NavLink
         to="/create"
         className={({ isActive }) =>

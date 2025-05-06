@@ -15,12 +15,7 @@ const Homepage = () => {
 
   const links = [
     {
-      label: 'Track a Parcel',
-      description: 'Track the status and journey of a package.',
-      icon: <PackageSearch className="h-6 w-6 text-blue-400" />,
-      route: '/track',
-    },
-    {
+      
       label: 'Create Shipment',
       description: 'Send a new package to any location.',
       icon: <PlusCircle className="h-6 w-6 text-green-400" />,
@@ -65,50 +60,48 @@ const Homepage = () => {
         A smart parcel delivery platform for real-time tracking, shipment management, and courier updates.
       </p>
 
+      {/* Track Parcel Section */}
+      <div id="track" className="bg-gray-800 p-6 rounded-xl mb-8 w-full max-w-md">
+        <h2 className="text-2xl font-semibold mb-4 text-center">Track a Parcel</h2>
+        <form
+          className="flex gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (trackingNumber.trim()) {
+              navigate(`/track/${trackingNumber.trim()}`);
+            }
+          }}
+        >
+          <input
+            type="text"
+            placeholder="Enter tracking number"
+            value={trackingNumber}
+            onChange={(e) => setTrackingNumber(e.target.value)}
+            className="flex-grow px-3 py-2 rounded-md text-black"
+          />
+          <button
+            type="submit"
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+          >
+            Track
+          </button>
+        </form>
+      </div>
+
+      {/* Home Features Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
         {links.map(({ label, description, icon, route }) => (
           <motion.div
             key={label}
             whileHover={{ scale: 1.05 }}
             className="cursor-pointer bg-gray-800 p-6 rounded-xl border border-gray-700 hover:bg-gray-700 transition"
-            onClick={() => {
-              if (label !== 'Track a Parcel') {
-                navigate(route);
-              }
-            }}
+            onClick={() => navigate(route)}
           >
             <div className="flex items-center gap-4 mb-3">
               {icon}
               <h3 className="text-lg font-semibold">{label}</h3>
             </div>
             <p className="text-gray-400 text-sm">{description}</p>
-
-            {label === 'Track a Parcel' && (
-              <form
-                className="mt-4 flex gap-2"
-                onClick={(e) => e.stopPropagation()}
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (trackingNumber.trim()) {
-                    navigate(`/track/${trackingNumber.trim()}`);
-                  }
-                }}
-              >
-                <input
-                  type="text"
-                  placeholder="Enter tracking number"
-                  value={trackingNumber}
-                  onChange={(e) => setTrackingNumber(e.target.value)}
-                  className="flex-grow px-3 py-2 rounded-md text-black"
-                />
-                <button
-                  type="submit"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-                >
-                  Track
-                </button>
-              </form>
-            )}
           </motion.div>
         ))}
       </div>

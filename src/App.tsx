@@ -1,16 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+
 import ParcelForm from './components/ParcelForm';
 import TrackingPage from './components/ParcelTracker';
 import { CourierLogin } from './components/CourierLogin';
 import { CourierDashboard } from './components/CourierDashboard';
 import Homepage from './components/Homepage';
 import Navbar from './components/Navbar';
-import Catalog from "./components/Catalog";
-import { demoParcels } from './demoParcels'; // <== Import the correct demo data
-import { Parcel } from './types';
-import  {CourierDashboardWrapper} from './components/CourierDashboardWrapper';
+import Catalog from './components/Catalog';
+import { demoParcels } from './demoParcels';
+import { CourierDashboardWrapper } from './components/CourierDashboardWrapper';
 
 const AppContent = ({
   courierId,
@@ -33,21 +33,24 @@ const AppContent = ({
         transition={{ duration: 0.3 }}
       >
         <Routes location={location}>
-          <Route path="/create" element={<ParcelForm />} />
+          {/* Public Routes */}
+          <Route path="/" element={<Homepage />} />
           <Route path="/track" element={<TrackingPage />} />
           <Route path="/track/:trackingNumber" element={<TrackingPage />} />
-          <Route path="/" element={<Homepage />} />
+          <Route path="/create" element={<ParcelForm />} />
           <Route path="/catalog" element={<Catalog />} />
+
+          {/* Courier Routes */}
           <Route path="/dashboard" element={<CourierDashboardWrapper />} />
           <Route path="/courier/dashboard" element={<CourierDashboardWrapper />} />
-         <Route
+          <Route
             path="/courier"
             element={
               courierId ? (
                 <CourierDashboard
                   courierId={courierId}
                   onLogout={handleCourierLogout}
-                  demoParcels={demoParcels} // Now using imported demoParcels
+                  
                 />
               ) : (
                 <CourierLogin onLogin={handleCourierLogin} />
@@ -61,10 +64,7 @@ const AppContent = ({
 };
 
 function App() {
-  const [courierId, setCourierId] = useState<string | null>(() => {
-    return localStorage.getItem('courierId') || null;
-  });
-  
+  const [courierId, setCourierId] = useState<string | null>(() => localStorage.getItem('courierId'));
 
   const handleCourierLogin = (id: string) => {
     setCourierId(id);

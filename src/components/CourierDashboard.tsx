@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getParcelsByCourier, updateParcelStatus } from '../api';
-import { API_URL } from '../api';
-import { demoParcels } from '../demoParcels'; // or wherever you saved them
+import { demoParcels } from '../demoParcels';
 import { Parcel, TrackingUpdate } from '../types';
 import {
   Loader2,
@@ -16,7 +15,7 @@ import { motion } from 'framer-motion';
 interface CourierDashboardProps {
   courierId: string;
   onLogout: () => void;
-  demoParcels: Parcel[]; // <- make sure this line ends with a semicolon
+
 }
 
 
@@ -33,33 +32,19 @@ export function CourierDashboard({ courierId, onLogout }: CourierDashboardProps)
       setParcels(data);
       setError('');
     } catch (err) {
-      setError('Failed to load parcels. Please try again.');
+      console.error('Failed to fetch parcels. Using demo data.', err);
+      setParcels(demoParcels);
+      setError('Failed to load live parcels. Showing demo data.');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (!courierId) return; // Don't run if courierId is missing
-  
-    async function fetchParcels() {
-      try {
-        const response = await fetch(`${API_URL}/couriers/${courierId}/parcels`);
-        if (!response.ok) throw new Error('Network error');
-        const data = await response.json();
-        setParcels(data);
-      } catch (error) {
-        console.error('Failed to fetch parcels. Using demo data.', error);
-        setParcels(demoParcels); // fallback
-      } finally {
-        setLoading(false);
-      }
-    }
-  
+    if (!courierId) return;
     fetchParcels();
   }, [courierId]);
-  
-  
+
   const handleStatusUpdate = async (
     parcelId: string,
     status: string,
@@ -186,25 +171,26 @@ export function CourierDashboard({ courierId, onLogout }: CourierDashboardProps)
                     <div className="mt-2 flex flex-col gap-1">
                       {getStatusBadge(current)}
                       {parcel.estimated_delivery && (
-                    <p className="text-xs text-gray-500">
-                        Est. delivery: {new Date(parcel.estimated_delivery).toLocaleDateString()}
-                     </p>
-                       )}
-                   </div>
+                        <p className="text-xs text-gray-500">
+                          Est. delivery: {new Date(parcel.estimated_delivery).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium text-gray-700">
-                       {parcel.recipient.address}
-                     </p>
-                     <p className="text-xs text-gray-500">{parcel.recipient.phone}</p>
-                      {latest.timestamp && (
-                     <p className="text-xs text-gray-400 mt-1">
-                       Updated: {new Date(latest.timestamp).toLocaleString()}
-                     </p>
-                      )}
+                      {parcel.recipient.address}
+                    </p>
+                    <p className="text-xs text-gray-500">{parcel.recipient.phone}</p>
+                    {latest.timestamp && (
+                      <p className="text-xs text-gray-400 mt-1">
+                        Updated: {new Date(latest.timestamp).toLocaleString()}
+                      </p>
+                    )}
+
                   </div>
-                
                 </div>
+
                 {next.length > 0 && (
                   <div className="mt-4 pt-3 border-t">
                     <p className="text-xs text-gray-500 mb-2">Update Status:</p>
@@ -244,4 +230,3 @@ export function CourierDashboard({ courierId, onLogout }: CourierDashboardProps)
   );
 }
 
-export default CourierDashboard;
