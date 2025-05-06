@@ -77,7 +77,12 @@ const AppContent = ({
             }
           />
 
+
           {/* Customer Routes */}
+          <Route
+          path="/customer-login"
+          element={<CustomerLogin onLogin={handleCustomerLogin} />}
+          /> 
           <Route
             path="/customer"
             element={
