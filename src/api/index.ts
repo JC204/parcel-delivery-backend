@@ -1,4 +1,5 @@
 import { Parcel, TrackingUpdate, Courier } from '../types';
+import  {demoParcels}  from '../demoParcels'
 
 // Will be replaced by deploy-all.sh — must use double quotes
 export const API_URL = import.meta.env.VITE_API_URL;
@@ -71,3 +72,10 @@ export async function createTestParcel(): Promise<Parcel> {
   if (!res.ok) throw new Error("Failed to create test parcel");
   return res.json();
 }
+export const getCustomerParcels = async (customerId: string): Promise<Parcel[]> => {
+  return demoParcels.filter(
+    (parcel) =>
+      parcel.sender.customerId === customerId ||
+      parcel.recipient.customerId === customerId
+  );
+};

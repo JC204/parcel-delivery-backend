@@ -6,20 +6,34 @@ import ParcelForm from './components/ParcelForm';
 import TrackingPage from './components/ParcelTracker';
 import { CourierLogin } from './components/CourierLogin';
 import { CourierDashboard } from './components/CourierDashboard';
+import  CustomerLogin  from './components/CustomerLogin';
+import  CustomerDashboard  from './components/CustomerDashboard';
 import Homepage from './components/Homepage';
 import Navbar from './components/Navbar';
 import Catalog from './components/Catalog';
-import { demoParcels } from './demoParcels';
+import  {demoCustomers}  from './demoCustomer'; // Adjust path if needed
+
 import { CourierDashboardWrapper } from './components/CourierDashboardWrapper';
+import  {Customer}  from './types';
+
+
+const [customerId, setCustomerId] = useState<string | null>(null);
+const [customerName, setCustomerName] = useState<string | null>(null);
 
 const AppContent = ({
   courierId,
+  customerId,
   handleCourierLogin,
+  handleCustomerLogin,
   handleCourierLogout,
+  handleCustomerLogout,
 }: {
   courierId: string | null;
+  customerId: string | null;
   handleCourierLogin: (id: string) => void;
+  handleCustomerLogin: (id: string) => void;
   handleCourierLogout: () => void;
+  handleCustomerLogout: () => void;
 }) => {
   const location = useLocation();
 
@@ -34,11 +48,21 @@ const AppContent = ({
       >
         <Routes location={location}>
           {/* Public Routes */}
-          <Route path="/" element={<Homepage />} />
+          
           <Route path="/track" element={<TrackingPage />} />
-          <Route path="/track/:trackingNumber" element={<TrackingPage />} />
+          <Route path="/track/:tracking_number" element={<TrackingPage />} />
           <Route path="/create" element={<ParcelForm />} />
           <Route path="/catalog" element={<Catalog />} />
+          <Route
+  path="/"
+  element={
+    <Homepage
+      courierId={courierId}
+      customerId={customerId}
+      customerName={customerName}
+    />
+  }
+/>
 
           {/* Courier Routes */}
           <Route path="/dashboard" element={<CourierDashboardWrapper />} />
@@ -50,10 +74,24 @@ const AppContent = ({
                 <CourierDashboard
                   courierId={courierId}
                   onLogout={handleCourierLogout}
-                  
                 />
               ) : (
                 <CourierLogin onLogin={handleCourierLogin} />
+              )
+            }
+          />
+
+          {/* Customer Routes */}
+          <Route
+            path="/customer"
+            element={
+              customerId ? (
+                <CustomerDashboard
+                  customerId={customerId!}
+                  onLogout={handleCustomerLogout}
+                />
+              ) : (
+                <CustomerLogin onLogin={handleCustomerLogin} />
               )
             }
           />
@@ -65,6 +103,7 @@ const AppContent = ({
 
 function App() {
   const [courierId, setCourierId] = useState<string | null>(() => localStorage.getItem('courierId'));
+  const [customerId, setCustomerId] = useState<string | null>(() => localStorage.getItem('customerId'));
 
   const handleCourierLogin = (id: string) => {
     setCourierId(id);
@@ -76,15 +115,32 @@ function App() {
     localStorage.removeItem('courierId');
   };
 
+  const handleCustomerLogin = (id: string) => {
+    setCustomerId(id);
+    // Optionally: look up name by id from demoCustomers
+    const match = demoCustomers.find((c) => c.customerId === id);
+    setCustomerName(match?.name ?? null);
+  };
+  
+  
+
+  const handleCustomerLogout = () => {
+    setCustomerId(null);
+    localStorage.removeItem('customerId');
+  };
+
   return (
     <Router>
       <div className="min-h-screen flex flex-col bg-gray-50">
-        <Navbar courierId={courierId} logout={handleCourierLogout} />
+      <Navbar courierId={courierId} customerId={customerId} logout={handleCourierLogout} />
         <main className="container mx-auto px-4 py-8 flex-grow">
           <AppContent
             courierId={courierId}
+            customerId={customerId}
             handleCourierLogin={handleCourierLogin}
+            handleCustomerLogin={handleCustomerLogin}
             handleCourierLogout={handleCourierLogout}
+            handleCustomerLogout={handleCustomerLogout}
           />
         </main>
         <footer className="bg-gray-100 border-t py-6">

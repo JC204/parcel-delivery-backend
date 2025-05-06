@@ -2,11 +2,12 @@
 
 // Customer structure
 export interface Customer {
-  id?: number | string;
+  customerId?: number | string;
   name: string;
   email: string;
   phone: string;
   address: string;
+  password?: string; //
 }
 
 // Courier details
