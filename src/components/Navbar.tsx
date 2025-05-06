@@ -73,7 +73,7 @@ const Navbar = ({ courierId, customerId, logout }: NavbarProps) => {
       {/* Customer Dashboard */}
       {customerId && (
         <NavLink
-          to="/customer-dashboard"
+          to="/customer"
           className={({ isActive }) =>
             isActive ? `${linkClass} ${activeClass}` : linkClass
           }
