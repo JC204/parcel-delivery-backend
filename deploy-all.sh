@@ -46,7 +46,7 @@ echo -e "${GREEN}👉 Starting ngrok tunnel...${NC}"
 ngrok http 5000 > ngrok.log &
 NGROK_PID=$!
 
-sleep 3 &
+sleep 5 &
 spinner
 
 # === Fetch and validate ngrok URL ===
