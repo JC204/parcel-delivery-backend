@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Loader2, AlertCircle, Truck } from 'lucide-react';
+import { Loader2, AlertCircle, Truck, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import { getCouriers } from '../api';
 import { Courier } from '../types';
 
@@ -12,8 +13,12 @@ export function CourierLogin({ onLogin }: CourierLoginProps) {
   const [couriers, setCouriers] = useState<Courier[]>([]);
   const [selectedCourierId, setSelectedCourierId] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchCouriers() {
@@ -37,6 +42,7 @@ export function CourierLogin({ onLogin }: CourierLoginProps) {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess(false);
 
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/couriers/login`, {
@@ -51,7 +57,11 @@ export function CourierLogin({ onLogin }: CourierLoginProps) {
       }
 
       const data = await res.json();
-      onLogin(data.courier_id); // notify parent component
+      setSuccess(true);
+      setTimeout(() => {
+        onLogin(data.courier_id);
+        navigate('/dashboard');
+      }, 1000);
     } catch (err: any) {
       setError(err.message || 'Login failed. Please try again.');
     }
@@ -85,6 +95,13 @@ export function CourierLogin({ onLogin }: CourierLoginProps) {
         <div className="mb-6 p-3 bg-red-50 text-red-700 rounded-md flex items-center gap-2">
           <AlertCircle className="h-5 w-5 flex-shrink-0" />
           <p className="text-sm">{error}</p>
+        </div>
+      )}
+
+      {success && (
+        <div className="mb-6 p-3 bg-green-50 text-green-700 rounded-md flex items-center gap-2">
+          <CheckCircle className="h-5 w-5 flex-shrink-0" />
+          <p className="text-sm">Login successful! Redirecting...</p>
         </div>
       )}
 
@@ -127,14 +144,24 @@ export function CourierLogin({ onLogin }: CourierLoginProps) {
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
               Password
             </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
+            <div className="relative">
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-2 top-2 text-gray-500 hover:text-gray-700"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
+            </div>
           </div>
 
           <button

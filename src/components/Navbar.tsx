@@ -3,19 +3,29 @@ import { NavLink } from 'react-router-dom';
 interface NavbarProps {
   courierId: string | null;
   customerId: string | null;
-  logout: () => void;
+  courierLogout: () => void;
+  customerLogout: () => void;
 }
 
-const Navbar = ({ courierId, customerId, logout }: NavbarProps) => {
+const Navbar = ({
+  courierId,
+  customerId,
+  courierLogout,
+  customerLogout,
+}: NavbarProps) => {
   const linkClass =
     'px-4 py-2 text-gray-700 hover:text-blue-600 hover:underline transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2';
   const activeClass = 'text-blue-600 font-semibold underline';
 
   return (
-    <nav className="flex items-center space-x-6 bg-white shadow-md py-4 px-6">
+    <nav
+      role="navigation"
+      className="flex items-center space-x-6 bg-white shadow-md py-4 px-6"
+    >
       {/* Home */}
       <NavLink
         to="/"
+        title="Home"
         className={({ isActive }) =>
           isActive ? `${linkClass} ${activeClass}` : linkClass
         }
@@ -27,6 +37,7 @@ const Navbar = ({ courierId, customerId, logout }: NavbarProps) => {
       {/* Track */}
       <NavLink
         to="/track"
+        title="Track parcel"
         className={({ isActive }) =>
           isActive ? `${linkClass} ${activeClass}` : linkClass
         }
@@ -38,6 +49,7 @@ const Navbar = ({ courierId, customerId, logout }: NavbarProps) => {
       {/* Create */}
       <NavLink
         to="/create"
+        title="Create new parcel"
         className={({ isActive }) =>
           isActive ? `${linkClass} ${activeClass}` : linkClass
         }
@@ -49,6 +61,7 @@ const Navbar = ({ courierId, customerId, logout }: NavbarProps) => {
       {/* Catalog */}
       <NavLink
         to="/catalog"
+        title="View catalog"
         className={({ isActive }) =>
           isActive ? `${linkClass} ${activeClass}` : linkClass
         }
@@ -61,6 +74,7 @@ const Navbar = ({ courierId, customerId, logout }: NavbarProps) => {
       {courierId && (
         <NavLink
           to="/dashboard"
+          title="Courier dashboard"
           className={({ isActive }) =>
             isActive ? `${linkClass} ${activeClass}` : linkClass
           }
@@ -74,6 +88,7 @@ const Navbar = ({ courierId, customerId, logout }: NavbarProps) => {
       {customerId && (
         <NavLink
           to="/customer"
+          title="Customer dashboard"
           className={({ isActive }) =>
             isActive ? `${linkClass} ${activeClass}` : linkClass
           }
@@ -84,35 +99,42 @@ const Navbar = ({ courierId, customerId, logout }: NavbarProps) => {
       )}
 
       {/* Customer Login */}
-      <NavLink
-        to="/customer-login"
-        className={({ isActive }) =>
-          isActive ? `${linkClass} ${activeClass}` : linkClass
-        }
-        aria-label="Customer login"
-      >
-        Customer Login
-      </NavLink>
+      {!customerId && (
+        <NavLink
+          to="/customer-login"
+          title="Customer login"
+          className={({ isActive }) =>
+            isActive ? `${linkClass} ${activeClass}` : linkClass
+          }
+          aria-label="Customer login"
+        >
+          Customer Login
+        </NavLink>
+      )}
 
       {/* Spacer */}
       <div className="flex-grow" />
 
       {/* Login State Display */}
-      {courierId ? (
+      {courierId && (
         <button
-          onClick={logout}
+          onClick={courierLogout}
+          title={`Logout as courier ${courierId}`}
           className="text-red-600 font-semibold hover:underline"
         >
           Logout (Courier: {courierId})
         </button>
-      ) : customerId ? (
+      )}
+      {customerId && !courierId && (
         <button
-          onClick={logout}
+          onClick={customerLogout}
+          title={`Logout as customer ${customerId}`}
           className="text-red-600 font-semibold hover:underline"
         >
           Logout (Customer: {customerId})
         </button>
-      ) : (
+      )}
+      {!courierId && !customerId && (
         <span className="text-gray-500 italic">Not logged in</span>
       )}
     </nav>

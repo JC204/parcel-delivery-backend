@@ -24,6 +24,7 @@ export function CourierDashboard({ courierId, onLogout }: CourierDashboardProps)
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [sortOption, setSortOption] = useState('tracking');
 
   const fetchParcels = async () => {
     setLoading(true);
@@ -101,6 +102,13 @@ export function CourierDashboard({ courierId, onLogout }: CourierDashboardProps)
     }
   };
 
+  const sortedParcels = [...parcels].sort((a, b) => {
+    if (sortOption === 'status') {
+      return (a.status ?? '').localeCompare(b.status ?? '');
+    }
+    return a.tracking_number.localeCompare(b.tracking_number);
+  });
+
   return (
     <motion.div
       className="max-w-4xl mx-auto p-6 bg-white rounded-2xl shadow-md"
@@ -146,87 +154,103 @@ export function CourierDashboard({ courierId, onLogout }: CourierDashboardProps)
           <p>You're currently not handling any deliveries.</p>
         </div>
       ) : (
-        <div className="space-y-6">
-          {parcels.map((parcel) => {
-            const history = parcel.tracking_history || [];
-            const latest = history[history.length - 1] || { status: 'processing' };
-            const current = latest.status;
-            const next = getNextPossibleStatuses(current);
+        <>
+          <div className="mb-4">
+            <label htmlFor="sortSelect" className="sr-only">
+              Sort parcels
+            </label>
+            <select
+              id="sortSelect"
+              title="Sort parcels by"
+              className="p-2 border rounded-md"
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+            >
+              <option value="tracking">Sort by Tracking #</option>
+              <option value="status">Sort by Status</option>
+            </select>
+          </div>
 
-            return (
-              <motion.div
-                key={parcel.tracking_number}
-                className="bg-gray-50 border rounded-xl p-4"
-                initial={{ opacity: 0.6, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h4 className="font-medium text-gray-800">
-                      {parcel.tracking_number}
-                    </h4>
-                    <p className="text-sm text-gray-500">
-                      {parcel.sender.name} → {parcel.recipient.name}
-                    </p>
-                    <div className="mt-2 flex flex-col gap-1">
-                      {getStatusBadge(current)}
-                      {parcel.estimated_delivery && (
-                        <p className="text-xs text-gray-500">
-                          Est. delivery: {new Date(parcel.estimated_delivery).toLocaleDateString()}
+          <div className="space-y-6">
+            {sortedParcels.map((parcel) => {
+              const history = parcel.tracking_history || [];
+              const latest = history[history.length - 1] || { status: 'processing' };
+              const current = latest.status;
+              const next = getNextPossibleStatuses(current);
+
+              return (
+                <motion.div
+                  key={parcel.tracking_number}
+                  className="bg-gray-50 border rounded-xl p-4"
+                  initial={{ opacity: 0.6, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-medium text-gray-800">
+                        {parcel.tracking_number}
+                      </h4>
+                      <p className="text-sm text-gray-500">
+                        {parcel.sender.name} → {parcel.recipient.name}
+                      </p>
+                      <div className="mt-2 flex flex-col gap-1">
+                        {getStatusBadge(current)}
+                        {parcel.estimated_delivery && (
+                          <p className="text-xs text-gray-500">
+                            Est. delivery: {new Date(parcel.estimated_delivery).toLocaleDateString()}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-gray-700">
+                        {parcel.recipient.address}
+                      </p>
+                      <p className="text-xs text-gray-500">{parcel.recipient.phone}</p>
+                      {latest.timestamp && (
+                        <p className="text-xs text-gray-400 mt-1">
+                          Updated: {new Date(latest.timestamp).toLocaleString()}
                         </p>
                       )}
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-gray-700">
-                      {parcel.recipient.address}
-                    </p>
-                    <p className="text-xs text-gray-500">{parcel.recipient.phone}</p>
-                    {latest.timestamp && (
-                      <p className="text-xs text-gray-400 mt-1">
-                        Updated: {new Date(latest.timestamp).toLocaleString()}
-                      </p>
-                    )}
 
-                  </div>
-                </div>
-
-                {next.length > 0 && (
-                  <div className="mt-4 pt-3 border-t">
-                    <p className="text-xs text-gray-500 mb-2">Update Status:</p>
-                    <div className="flex gap-2 flex-wrap">
-                      {next.map((status) => (
-                        <button
-                          key={status}
-                          disabled={updatingId === parcel.tracking_number}
-                          onClick={() =>
-                            handleStatusUpdate(
-                              parcel.tracking_number,
-                              status,
-                              status === 'delivered'
-                                ? parcel.recipient.address
-                                : 'Current location'
-                            )
-                          }
-                          className="flex items-center px-3 py-2 text-sm bg-white border rounded-md hover:bg-gray-50 disabled:opacity-50"
-                        >
-                          {updatingId === parcel.tracking_number ? (
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          ) : (
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                          )}
-                          {status.replace(/_/g, ' ')}
-                        </button>
-                      ))}
+                  {next.length > 0 && (
+                    <div className="mt-4 pt-3 border-t">
+                      <p className="text-xs text-gray-500 mb-2">Update Status:</p>
+                      <div className="flex gap-2 flex-wrap">
+                        {next.map((status) => (
+                          <button
+                            key={status}
+                            disabled={updatingId === parcel.tracking_number}
+                            onClick={() =>
+                              handleStatusUpdate(
+                                parcel.tracking_number,
+                                status,
+                                status === 'delivered'
+                                  ? parcel.recipient.address
+                                  : 'Current location'
+                              )
+                            }
+                            className="flex items-center px-3 py-2 text-sm bg-white border rounded-md hover:bg-gray-50 disabled:opacity-50"
+                          >
+                            {updatingId === parcel.tracking_number ? (
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            ) : (
+                              <CheckCircle className="h-4 w-4 mr-2" />
+                            )}
+                            {status.replace(/_/g, ' ')}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </motion.div>
-            );
-          })}
-        </div>
+                  )}
+                </motion.div>
+              );
+            })}
+          </div>
+        </>
       )}
     </motion.div>
   );
-}
-
+ }

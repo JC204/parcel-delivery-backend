@@ -7,6 +7,7 @@ import {
   UserCheck,
   LogIn,
   CarFront,
+  PackageSearch,
 } from 'lucide-react';
 
 interface HomepageProps {
@@ -30,27 +31,36 @@ const Homepage = ({ courierId, customerId, customerName }: HomepageProps) => {
     {
       label: 'Create Shipment',
       description: 'Send a new package to any location.',
-      icon: <PlusCircle className="h-6 w-6 text-green-400" />,
+      icon: <PlusCircle className="h-6 w-6 text-green-400" aria-hidden="true" />,
       route: '/create',
     },
     {
       label: 'View Catalog',
       description: 'Browse through current and demo parcels.',
-      icon: <ClipboardList className="h-6 w-6 text-yellow-400" />,
+      icon: <ClipboardList className="h-6 w-6 text-yellow-400" aria-hidden="true" />,
       route: '/catalog',
     },
-    {
-      label: 'Courier Dashboard',
-      description: 'Access the courier dashboard and manage deliveries.',
-      icon: <UserCheck className="h-6 w-6 text-pink-400" />,
-      route: '/dashboard',
-    },
-    {
-      label: 'Customer Login',
-      description: 'Track and manage your deliveries as a customer.',
-      icon: <LogIn className="h-6 w-6 text-purple-400" />,
-      route: '/customer-login',
-    },
+    ...(courierId
+      ? [{
+          label: 'Courier Dashboard',
+          description: 'Access the courier dashboard and manage deliveries.',
+          icon: <UserCheck className="h-6 w-6 text-pink-400" aria-hidden="true" />,
+          route: '/dashboard',
+        }]
+      : []),
+    ...(customerId
+      ? [{
+          label: 'My Parcels',
+          description: 'View and track your personal delivery history.',
+          icon: <PackageSearch className="h-6 w-6 text-cyan-400" aria-hidden="true" />,
+          route: '/customer',
+        }]
+      : [{
+          label: 'Customer Login',
+          description: 'Track and manage your deliveries as a customer.',
+          icon: <LogIn className="h-6 w-6 text-purple-400" aria-hidden="true" />,
+          route: '/customer-login',
+        }]),
   ];
 
   return (
@@ -62,7 +72,7 @@ const Homepage = ({ courierId, customerId, customerName }: HomepageProps) => {
         animate={{ x: '100vw' }}
         transition={{ duration: 5, repeat: Infinity, ease: 'linear' }}
       >
-        <CarFront className="h-12 w-12 text-blue-500" />
+        <CarFront className="h-12 w-12 text-blue-500" aria-label="ParcelSwift delivery car animation" />
       </motion.div>
 
       {/* Welcome Message */}
@@ -97,10 +107,12 @@ const Homepage = ({ courierId, customerId, customerName }: HomepageProps) => {
             value={trackingNumber}
             onChange={(e) => setTrackingNumber(e.target.value)}
             className="flex-grow px-3 py-2 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-blue-400"
+            aria-label="Tracking number input"
           />
           <button
             type="submit"
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            aria-label="Submit tracking number"
           >
             Track
           </button>
@@ -115,6 +127,7 @@ const Homepage = ({ courierId, customerId, customerName }: HomepageProps) => {
             whileHover={{ scale: 1.05 }}
             className="cursor-pointer bg-gray-800 p-6 rounded-xl border border-gray-700 hover:bg-gray-700 transition"
             onClick={() => navigate(route)}
+            aria-label={label}
           >
             <div className="flex items-center gap-4 mb-3">
               {icon}
@@ -128,4 +141,4 @@ const Homepage = ({ courierId, customerId, customerName }: HomepageProps) => {
   );
 };
 
-export default Homepage;
+export default Homepage

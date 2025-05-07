@@ -135,7 +135,12 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen flex flex-col bg-gray-50">
-        <Navbar courierId={courierId} customerId={customerId} logout={handleCourierLogout} />
+      <Navbar
+  courierId={courierId}
+  customerId={customerId}
+  courierLogout={handleCourierLogout}
+  customerLogout={handleCustomerLogout}
+/>
         <main className="container mx-auto px-4 py-8 flex-grow">
           <AppContent
             courierId={courierId}

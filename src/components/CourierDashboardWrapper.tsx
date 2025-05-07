@@ -8,12 +8,17 @@ export function CourierDashboardWrapper() {
   const [courierId, setCourierId] = useState<string | null>(null);
 
   const handleLogin = (id: string) => {
-    console.log("Courier logged in with ID:", id);
+    console.log('Courier logged in with ID:', id);
     setCourierId(id);
   };
 
+  const handleLogout = () => {
+    console.log('Courier logged out.');
+    setCourierId(null);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-4">
+    <div className="min-h-screen bg-gray-900 text-white py-10 px-4">
       <AnimatePresence mode="wait">
         {courierId ? (
           <motion.div
@@ -23,17 +28,13 @@ export function CourierDashboardWrapper() {
             exit={{ opacity: 0, y: -16 }}
             transition={{ duration: 0.4 }}
           >
-            <h2 className="text-lg font-semibold text-gray-700 mb-4">
-              Demo Courier Dashboard (Session will reset on refresh)
-            </h2>
-            <CourierDashboard
-              courierId={courierId}
-              onLogout={() => {
-                console.log("Courier logged out.");
-                setCourierId(null);
-              }}
-            
-            />
+            <h1 className="text-2xl font-bold text-white mb-4">
+              Courier Dashboard
+            </h1>
+            <p className="text-sm text-gray-400 mb-6 italic">
+              Demo session — resets on refresh.
+            </p>
+            <CourierDashboard courierId={courierId} onLogout={handleLogout} />
           </motion.div>
         ) : (
           <motion.div
@@ -49,4 +50,4 @@ export function CourierDashboardWrapper() {
       </AnimatePresence>
     </div>
   );
-}
+ }
