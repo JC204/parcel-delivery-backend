@@ -42,7 +42,7 @@ FLASK_PID=$!
 
 # === Wait until Flask backend responds locally ===
 echo -e "${GREEN}⌛ Waiting for Flask to start on ${LOCAL_API_URL}/couriers...${NC}"
-until curl --silent "$LOCAL_API_URL/couriers" | jq '.' > /dev/null 2>&1; do
+until curl --silent -H "Origin: http://localhost:5173" "$LOCAL_API_URL/couriers" | grep -q '"id"'; do
   echo -e "${RED}  Flask not ready yet. Retrying...${NC}"
   sleep 2
 done
