@@ -95,6 +95,13 @@ def setup_demo_data():
 
     return jsonify({'message': 'Demo data initialized'}), 200
 
+# Auto-seed demo data on first request
+@app.before_first_request
+def auto_seed_demo():
+    if not Parcel.query.first():
+        with app.app_context():
+            setup_demo_data()
+
 # Route: Get all couriers
 @app.route('/couriers', methods=['GET'])
 def get_all_couriers():
@@ -136,5 +143,4 @@ def courier_logout():
 
 # Run the server
 if __name__ == '__main__':
-
-     app.run(debug=True)
+    app.run(debug=True)
