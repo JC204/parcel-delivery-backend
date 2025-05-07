@@ -40,7 +40,13 @@ cd "$PROJECT_DIR"
 FLASK_APP=app.py flask run --host=0.0.0.0 --port=5000 > flask.log 2>&1 &
 FLASK_PID=$!
 
-sleep 2
+# === Wait until Flask backend responds locally ===
+echo -e "${GREEN}⌛ Waiting for Flask to start on ${LOCAL_API_URL}/couriers...${NC}"
+until curl --silent "$LOCAL_API_URL/couriers" | jq '.' > /dev/null 2>&1; do
+  echo -e "${RED}  Flask not ready yet. Retrying...${NC}"
+  sleep 2
+done
+echo -e "${GREEN}✅ Flask is up locally!${NC}"
 
 echo -e "${GREEN}👉 Starting ngrok tunnel...${NC}"
 ngrok http 5000 > ngrok.log &
@@ -64,8 +70,9 @@ open http://127.0.0.1:4040
 
 # === Wait until backend is actually serving valid JSON ===
 echo -e "${GREEN}⌛ Waiting for backend to serve valid JSON from ${NGROK_URL}/couriers...${NC}"
-until curl --silent "$NGROK_URL/couriers" | jq '.' > /dev/null 2>&1; do
+until curl --silent "$NGROK_URL/couriers" | tee /tmp/ngrok_response.json | jq '.' > /dev/null 2>&1; do
   echo -e "${RED}  Backend not ready yet. Retrying...${NC}"
+  cat /tmp/ngrok_response.json
   sleep 2
 done
 echo -e "${GREEN}✅ Backend is reachable and serving JSON!${NC}"
@@ -83,9 +90,7 @@ git commit -m "Set VITE_API_URL to $NGROK_URL for Netlify deploy" || echo "ℹ�
 git push origin main
 echo -e "${GREEN}✅ API URL pushed to GitHub.${NC}"
 
-
-
-# === Sync Netlify environment variable ===
+ # === Sync Netlify environment variable ===
 echo -e "${GREEN}👉 Syncing VITE_API_URL with Netlify...${NC}"
 netlify env:set VITE_API_URL "$NGROK_URL" --force
 echo -e "${GREEN}👉 Triggering rebuild on Netlify with empty commit...${NC}"
@@ -153,5 +158,4 @@ open "$NETLIFY_URL"
 echo ""
 echo -e "${GREEN}🚀 Demo is live! Press Ctrl+C to stop Flask and ngrok.${NC}"
 
-
- wait
+wait
