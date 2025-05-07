@@ -10,14 +10,16 @@ interface CustomerDashboardProps {
 const CustomerDashboard = ({ customerId, onLogout }: CustomerDashboardProps) => {
   const [parcels, setParcels] = useState<Parcel[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchParcels = async () => {
       try {
         const data = await getCustomerParcels(customerId);
         setParcels(data);
-      } catch (error) {
-        console.error('Error fetching parcels:', error);
+      } catch (err) {
+        console.error('Error fetching parcels:', err);
+        setError('Failed to load parcels. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -41,21 +43,29 @@ const CustomerDashboard = ({ customerId, onLogout }: CustomerDashboardProps) => 
 
       {loading ? (
         <p>Loading parcels...</p>
+      ) : error ? (
+        <p className="text-red-400">{error}</p>
       ) : parcels.length === 0 ? (
         <p>No parcels found.</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {parcels.map((parcel) => (
             <div
               key={parcel.tracking_number}
-              className="bg-gray-800 p-4 rounded-lg border border-gray-700"
+              className="bg-gray-800 p-4 rounded-lg border border-gray-700 shadow-md"
             >
               <h3 className="text-lg font-semibold mb-2">
-                {parcel.tracking_number}
+                Tracking #: {parcel.tracking_number}
               </h3>
-              <p>Status: {parcel.status}</p>
-              <p>Destination: {parcel.recipient.address}</p> {/* ✅ Fixed from "destination" */}
-              <p>Courier: {parcel.courier_id}</p>
+              <p className="mb-1">
+                <span className="font-medium">Status:</span> {parcel.status}
+              </p>
+              <p className="mb-1">
+                <span className="font-medium">Recipient:</span> {parcel.recipient?.address || 'N/A'}
+              </p>
+              <p>
+                <span className="font-medium">Courier:</span> {parcel.courier_id || 'Unassigned'}
+              </p>
             </div>
           ))}
         </div>
