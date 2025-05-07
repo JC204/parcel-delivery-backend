@@ -59,19 +59,19 @@ class Parcel(db.Model):
     def to_dict(self):
         return { 
             'tracking_number': self.tracking_number,
-            'sender': self.sender.to_dict(),
-            'recipient': self.recipient.to_dict(),
-            'courier_name': self.courier.name if self.courier else None,
-            'courier_id': self.courier.id if self.courier else None,
+            'id' : self.id,
+            'status': self.status,
+            'estimated_delivery': self.estimated_delivery.isoformat() if self.estimated_delivery else None,
+            'description': self.description,
             'weight': self.weight,
             'length': self.length,
             'width': self.width,
             'height': self.height,
             'service_type': self.service_type,
-            'estimated_delivery': self.estimated_delivery.isoformat() if self.estimated_delivery else None,
-            'description': self.description,
-            'status': self.status,
-            'courier_avatar': self.courier.avatar_url if self.courier and self.courier.avatar_url else None,
+            'sender': self.sender.to_dict(),
+            'recipient': self.recipient.to_dict(),
+            'courier_id': self.courier.id if self.courier else None,
+            'courier_name': self.courier.name if self.courier else None,  
             'tracking_history': [update.to_dict() for update in self.tracking_updates]   
            }
 
