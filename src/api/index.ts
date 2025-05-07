@@ -1,5 +1,5 @@
 import { Parcel, TrackingUpdate, Courier } from '../types';
-import { demoParcels } from 'demoParcels';
+import { demoParcels } from '../demoParcels';
 
 // Will be replaced by deploy-all.sh — must use double quotes
 export const API_URL = import.meta.env.VITE_API_URL;
