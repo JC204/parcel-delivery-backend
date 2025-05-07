@@ -52,7 +52,7 @@ def create_parcel():
         width=data.get('width', 5),
         height=data.get('height', 2),
         service_type=data.get('service_type', 'Standard'),
-        estimated_delivery=datetime.utcnow() + timedelta(days=3),
+        estimated_delivery = datetime.utcnow() + timedelta(days=random.randint(2, 7)),
         description=data.get('description', 'Demo parcel'),
         status='Created'
     )

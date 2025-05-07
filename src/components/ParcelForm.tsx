@@ -8,7 +8,7 @@ type ParcelFormState = {
   recipient: Customer;
   weight: number;
   description: string;
-  estimated_delivery: string;
+  
 };
 
 const ParcelForm: React.FC = () => {
@@ -17,7 +17,7 @@ const ParcelForm: React.FC = () => {
     recipient: { name: "", phone: "", address: "", email: "" },
     weight: 0,
     description: "",
-    estimated_delivery: "",
+    
   });
 
   const [submitted, setSubmitted] = useState(false);
@@ -72,7 +72,7 @@ const ParcelForm: React.FC = () => {
       recipient: { name: "", phone: "", address: "", email: "" },
       weight: 0,
       description: "",
-      estimated_delivery: "",
+      
     });
     setTrackingNumber("");
     setSubmitted(false);
@@ -144,18 +144,7 @@ const ParcelForm: React.FC = () => {
                 required
               />
             </label>
-
-            <label className="block">
-              <span className="text-sm text-gray-700 dark:text-gray-300">Estimated Delivery</span>
-              <input
-                type="date"
-                name="estimated_delivery"
-                value={parcel.estimated_delivery}
-                onChange={handleChange}
-                className={inputClass}
-                required
-              />
-            </label>
+ 
 
             <button
               type="submit"
