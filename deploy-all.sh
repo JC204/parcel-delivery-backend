@@ -70,11 +70,12 @@ open http://127.0.0.1:4040
 
 # === Wait until backend is actually serving valid JSON ===
 echo -e "${GREEN}⌛ Waiting for backend to serve valid JSON from ${NGROK_URL}/couriers...${NC}"
-until curl --silent "$NGROK_URL/couriers" | tee /tmp/ngrok_response.json | jq '.' > /dev/null 2>&1; do
+until curl --silent "$NGROK_URL/couriers" | grep -q '"id"'; do
   echo -e "${RED}  Backend not ready yet. Retrying...${NC}"
-  cat /tmp/ngrok_response.json
+ 
   sleep 2
 done
+echo -e "${GREEN}✅ Backend is ready via ngrok!${NC}"
 echo -e "${GREEN}✅ Backend is reachable and serving JSON!${NC}"
 
 # === Update .env ===
