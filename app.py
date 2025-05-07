@@ -9,7 +9,7 @@ from models import db, Customer, Courier, Parcel, TrackingUpdate
 from dotenv import load_dotenv  # ✅ For .env support
 from database import db
 from parcels import parcels_bp
-
+from flask_migrate import Migrate
 
 load_dotenv()  # ✅ Load environment variables from .env
 
