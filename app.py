@@ -13,6 +13,15 @@ from flask_migrate import Migrate
 
 load_dotenv()  # ✅ Load environment variables from .env
 
+
+# existing setup...
+app = Flask(__name__)
+# existing db init...
+db.init_app(app)
+
+# ✅ Add this line to enable flask-migrate
+migrate = Migrate(app, db)
+
 app = Flask(__name__)
 CORS(app, supports_credentials=True, origins=[
     "http://localhost:5173",  # Vite local dev
