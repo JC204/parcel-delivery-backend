@@ -21,6 +21,7 @@ def create_parcel():
     data = request.json
     tracking_number = generate_tracking_number()
 
+    # Create sender and recipient as Customer entries
     sender = Customer(
         name=data['sender']['name'],
         email=data['sender']['email'],
@@ -37,8 +38,10 @@ def create_parcel():
     db.session.add(recipient)
     db.session.flush()
 
-    courier = Courier.query.first()  # Just pick the first courier for demo simplicity
+    # Auto-assign first courier
+    courier = Courier.query.first()
 
+    # Create the parcel
     parcel = Parcel(
         tracking_number=tracking_number,
         sender_id=sender.id,
@@ -54,11 +57,14 @@ def create_parcel():
         status='Created'
     )
     db.session.add(parcel)
+    db.session.flush()
 
+    # Create initial tracking update
     update = TrackingUpdate(
-        parcel_id=tracking_number,
+        parcel_id=parcel.id,
         status='Created',
         location='System',
+        timestamp=datetime.utcnow(),
         description='Parcel created'
     )
     db.session.add(update)
@@ -68,7 +74,7 @@ def create_parcel():
 
 @parcels_bp.route('/parcels/<tracking_number>/status', methods=['PUT'])
 def update_parcel_status(tracking_number):
-    parcel = Parcel.query.get(tracking_number)
+    parcel = Parcel.query.filter_by(tracking_number=tracking_number).first()
     if not parcel:
         return jsonify({'error': 'Parcel not found'}), 404
 
@@ -76,9 +82,10 @@ def update_parcel_status(tracking_number):
     parcel.status = data['status']
 
     update = TrackingUpdate(
-        parcel_id=tracking_number,
+        parcel_id=parcel.id,
         status=data['status'],
         location=data.get('location', 'Unknown'),
+        timestamp=datetime.utcnow(),
         description=data.get('description', '')
     )
     db.session.add(update)

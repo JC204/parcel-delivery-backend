@@ -139,6 +139,21 @@ const ParcelTracker = () => {
             </div>
           </div>
 
+{/* Courier Info */}
+{parcel.courier_name && (
+  <div className="mb-6 flex items-center gap-4">
+    <img
+      src={`https://api.dicebear.com/7.x/initials/svg?seed=${parcel.courier_name}`}
+      alt="Courier Avatar"
+      className="w-12 h-12 rounded-full border"
+    />
+    <div>
+      <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Assigned Courier</h3>
+      <p className="font-medium">{parcel.courier_name}</p>
+      <p className="text-sm text-gray-600 dark:text-gray-400">Courier ID: {parcel.courier_id}</p>
+    </div>
+  </div>
+         )} 
           <div className="p-6">
             {/* Sender & Recipient */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
