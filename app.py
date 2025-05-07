@@ -17,7 +17,7 @@ app = Flask(__name__)
 CORS(app, supports_credentials=True, origins=[
     "http://localhost:5173",  # Vite local dev
     "https://comforting-syrniki-99725d.netlify.app",  # Your Netlify site
-    "https://51ff-2603-3005-2b2c-a680-f8b0-39e7-97d2-4e42.ngrok-free.app"  # Current ngrok URL
+    "https://4dac-2601-18f-687-72f0-5046-d41c-a640-b17f.ngrok-free.app"  # Current ngrok URL
 ])
 
 # ✅ Secure session handling
