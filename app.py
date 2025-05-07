@@ -64,12 +64,14 @@ def setup_demo_data():
         db.session.bulk_save_objects(customers)
         db.session.commit()
 
-        for i in range(8):
+        for i in range(20):
             tracking_number = generate_tracking_number()
+            sender = customers[i % len(customers)]
+            recipient = customers[(i + 1) % len(customers)]
             parcel = Parcel(
                 tracking_number=tracking_number,
-                sender_id=customers[0].id,
-                recipient_id=customers[1].id,
+                sender_id=sender.id,
+                recipient_id=recipient.id,
                 courier_id='CR001' if i % 2 == 0 else 'CR002',
                 weight=1.5 + i,
                 length=10 + i,

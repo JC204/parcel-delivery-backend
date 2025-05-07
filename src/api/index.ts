@@ -1,5 +1,5 @@
 import { Parcel, TrackingUpdate, Courier } from '../types';
-import  {demoParcels}  from '../demoParcels'
+import { demoParcels } from 'demoParcels';
 
 // Will be replaced by deploy-all.sh — must use double quotes
 export const API_URL = import.meta.env.VITE_API_URL;
@@ -79,3 +79,10 @@ export const getCustomerParcels = async (customerId: string): Promise<Parcel[]> 
       parcel.recipient.customerId === customerId
   );
 };
+export async function getParcels(): Promise<Parcel[]> {
+  const response = await fetch("http://localhost:5000/parcels"); // adjust if needed
+  if (!response.ok) {
+    throw new Error("Failed to fetch parcels");
+  }
+  return await response.json();
+}

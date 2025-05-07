@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import { demoParcels } from "../demoParcels";
+import { getParcels } from "../api";
 import { Parcel } from "../types";
 
 const Catalog: React.FC = () => {
@@ -15,11 +15,18 @@ const Catalog: React.FC = () => {
 
   useEffect(() => {
     setLoading(true);
-    setTimeout(() => {
-      setParcels(demoParcels);
-      setLoading(false);
-    }, 300);
+    getParcels()
+      .then((data) => {
+        setParcels(data);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch parcels:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
+  
 
   useEffect(() => {
     if (!selectedParcel) return;
@@ -73,11 +80,18 @@ const Catalog: React.FC = () => {
         <button
           onClick={() => {
             setLoading(true);
-            setTimeout(() => {
-              setParcels(demoParcels);
-              setLoading(false);
-            }, 300);
+            getParcels()
+              .then((data) => {
+                setParcels(data);
+              })
+              .catch((error) => {
+                console.error("Failed to fetch parcels:", error);
+              })
+              .finally(() => {
+                setLoading(false);
+              });
           }}
+          
           className="flex items-center gap-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 shadow-sm transition disabled:opacity-50"
           disabled={loading}
         >
