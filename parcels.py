@@ -37,7 +37,7 @@ def create_parcel():
     )
     db.session.add(sender)
     db.session.add(recipient)
-    db.session.flush()
+    db.session.flush()  # ensure sender.id and recipient.id are available
 
     # Auto-assign first courier
     courier = Courier.query.first()
@@ -53,14 +53,14 @@ def create_parcel():
         width=data.get('width', 5),
         height=data.get('height', 2),
         service_type=data.get('service_type', 'Standard'),
-        estimated_delivery = datetime.utcnow() + timedelta(days=random.randint(2, 7)),
+        estimated_delivery=datetime.utcnow() + timedelta(days=random.randint(2, 7)),
         description=data.get('description', 'Demo parcel'),
         status='Created'
     )
     db.session.add(parcel)
-    db.session.flush()
+    db.session.commit()  # parcel now has a valid ID
 
-    # Create initial tracking update
+    # Now create initial tracking update
     update = TrackingUpdate(
         parcel_id=parcel.id,
         status='Created',
