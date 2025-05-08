@@ -2,7 +2,7 @@
 
 FLASK_APP=app.py
 FLASK_ENV=development
-SECRET_KEY=your-secure-random-secret-key-here
+SECRET_KEY=acc14d3d929ae69ed7f99861f951ec3947b67fbb2ced4df1f33b61bdb82d8c7c
 SQLALCHEMY_DATABASE_URI=sqlite:///parcel_delivery.db  # For development. Change for production DB.
 SQLALCHEMY_TRACK_MODIFICATIONS=False
 

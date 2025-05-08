@@ -1,8 +1,8 @@
-"""Initial schema
+"""Initial migration with correct FK
 
-Revision ID: edaa9756cf36
+Revision ID: c76f2810b6fa
 Revises: 
-Create Date: 2025-05-07 23:16:13.891149
+Create Date: 2025-05-08 08:20:48.993248
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'edaa9756cf36'
+revision = 'c76f2810b6fa'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -62,7 +62,7 @@ def upgrade():
     sa.Column('status', sa.String(length=50), nullable=True),
     sa.Column('location', sa.String(length=100), nullable=True),
     sa.Column('description', sa.String(length=200), nullable=True),
-    sa.ForeignKeyConstraint(['parcel_id'], ['parcel.tracking_number'], ),
+    sa.ForeignKeyConstraint(['parcel_id'], ['parcel.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###

@@ -78,7 +78,7 @@ class Parcel(db.Model):
 
 class TrackingUpdate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    parcel_id = db.Column(db.String(12), db.ForeignKey('parcel.tracking_number'), nullable=False)
+    parcel_id = db.Column(db.String(12), db.ForeignKey('parcel.id'), nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     status = db.Column(db.String(50))
     location = db.Column(db.String(100))
