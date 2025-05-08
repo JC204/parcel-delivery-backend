@@ -76,13 +76,7 @@ export async function loginCourier(courierId: string, password: string): Promise
 }
 
 
-export async function createTestParcel(): Promise<Parcel> {
-  const res = await fetch(`${API_URL}/test/create-parcel`, {
-    method: "POST",
-  });
-  if (!res.ok) throw new Error("Failed to create test parcel");
-  return res.json();
-}
+
 export const getCustomerParcels = async (customerId: string): Promise<Parcel[]> => {
   return demoParcels.filter(
     (parcel) =>

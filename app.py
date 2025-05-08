@@ -12,10 +12,13 @@ import logging
 # Load environment variables
 load_dotenv()
 
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # Optional, avoids HTTPS errors in dev
+
+
 # Initialize Flask app
 app = Flask(__name__)
 
-# CORS setup
+# CORS setup (add or adjust domains as needed)
 CORS(app, supports_credentials=True, origins=[
     "http://localhost:5173",
     "https://comforting-syrniki-99725d.netlify.app",
@@ -26,6 +29,9 @@ CORS(app, supports_credentials=True, origins=[
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-unsafe')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///parcel_delivery.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Optional: Make cookies secure (for HTTPS deployment)
+app.config['SESSION_COOKIE_SECURE'] = os.getenv('FLASK_ENV') == 'production'
 
 # Initialize DB and migration
 from database import db
@@ -42,16 +48,17 @@ logging.basicConfig(level=logging.INFO)
 def index():
     return "Backend is running!", 200
 
- 
+
 def generate_tracking_number():
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
 
- 
+
 def setup_demo_data():
     if Courier.query.first():
         logging.info("Demo data already exists. Skipping setup.")
         return
 
+    logging.warning("Using hardcoded credentials. Do not use in production.")
     logging.info("Setting up demo data...")
     
     couriers = [
@@ -105,7 +112,8 @@ def run_demo_data_setup():
     with app.app_context():
         setup_demo_data()
     return jsonify({'message': 'Demo data triggered manually'}), 200
- 
+
+
 @app.route('/couriers', methods=['GET'])
 def get_all_couriers():
     couriers = Courier.query.all()
@@ -145,14 +153,17 @@ def courier_logout():
     session.pop('courier_id', None)
     return jsonify({'message': 'Logged out'}), 200
 
+
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({'status': 'ok'}), 200
 
-# Run the app (for local dev or gunicorn)
 
+
+# Run the app for local development only
 if __name__ == '__main__':
     with app.app_context():
+        # For development use only: avoid this in production
         db.create_all()
         setup_demo_data()
     app.run(debug=True, port=int(os.environ.get('PORT', 5000)))
