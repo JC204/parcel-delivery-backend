@@ -142,6 +142,13 @@ def courier_logout():
     session.pop('courier_id', None)
     return jsonify({'message': 'Logged out'}), 200
 
+@app.route('/init-demo', methods=['GET'])
+def run_demo_data_setup():
+    with app.app_context():
+        setup_demo_data()
+    return jsonify({'message': 'Demo data triggered manually'}), 200
+
+
 # === Run the app ===
 if __name__ == '__main__':
     with app.app_context():
