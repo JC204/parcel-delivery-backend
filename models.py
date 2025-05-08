@@ -26,7 +26,7 @@ class Courier(db.Model):
     vehicle = db.Column(db.String(50))
     avatar_url = db.Column(db.String(255), nullable=True)
 
-
+   
     def to_dict(self):
         return {
             'id': self.id,
@@ -38,7 +38,7 @@ class Courier(db.Model):
 
 class Parcel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    tracking_number = db.Column(db.String(12), primary_key=True)
+    tracking_number = db.Column(db.String(12), unique=True, nullable=False)
     sender_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
     recipient_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
     courier_id = db.Column(db.String(10), db.ForeignKey('courier.id'))
@@ -58,10 +58,10 @@ class Parcel(db.Model):
     tracking_updates = db.relationship('TrackingUpdate', backref='parcel', lazy=True, cascade='all, delete-orphan')
 
     def to_dict(self):
-        return { 
+        return {
+            'id': self.id,
             'tracking_number': self.tracking_number,
-            'id' : self.id,
-            'status': self.status,
+             'status': self.status,
             'estimated_delivery': self.estimated_delivery.isoformat() if self.estimated_delivery else None,
             'description': self.description,
             'weight': self.weight,
@@ -72,9 +72,9 @@ class Parcel(db.Model):
             'sender': self.sender.to_dict(),
             'recipient': self.recipient.to_dict(),
             'courier_id': self.courier.id if self.courier else None,
-            'courier_name': self.courier.name if self.courier else None,  
-            'tracking_history': [update.to_dict() for update in self.tracking_updates]   
-           }
+            'courier_name': self.courier.name if self.courier else None,
+            'tracking_history': [update.to_dict() for update in self.tracking_updates]
+        }
 
 class TrackingUpdate(db.Model):
     id = db.Column(db.Integer, primary_key=True)

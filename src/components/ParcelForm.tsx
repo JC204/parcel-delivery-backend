@@ -8,7 +8,10 @@ type ParcelFormState = {
   recipient: Customer;
   weight: number;
   description: string;
-  
+  length: number;
+  width: number;
+  height: number;
+  service_type: string;
 };
 
 const ParcelForm: React.FC = () => {
@@ -17,14 +20,17 @@ const ParcelForm: React.FC = () => {
     recipient: { name: "", phone: "", address: "", email: "" },
     weight: 0,
     description: "",
-    
+    length: 0,
+    width: 0,
+    height: 0,
+    service_type: "Standard",
   });
 
   const [submitted, setSubmitted] = useState(false);
   const [trackingNumber, setTrackingNumber] = useState("");
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
 
@@ -38,10 +44,10 @@ const ParcelForm: React.FC = () => {
         ...prev,
         recipient: { ...prev.recipient, [name.replace("recipient_", "")]: value },
       }));
-    } else if (name === "weight") {
+    } else if (["weight", "length", "width", "height"].includes(name)) {
       setParcel((prev) => ({
         ...prev,
-        weight: parseFloat(value) || 0,
+        [name]: parseFloat(value) || 0,
       }));
     } else {
       setParcel((prev) => ({
@@ -72,7 +78,10 @@ const ParcelForm: React.FC = () => {
       recipient: { name: "", phone: "", address: "", email: "" },
       weight: 0,
       description: "",
-      
+      length: 0,
+      width: 0,
+      height: 0,
+      service_type: "Standard",
     });
     setTrackingNumber("");
     setSubmitted(false);
@@ -100,7 +109,7 @@ const ParcelForm: React.FC = () => {
     ));
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-lg dark:shadow-gray-800">
+    <div className="max-w-2xl mx-auto mt-10 p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-lg dark:shadow-gray-800">
       <AnimatePresence mode="wait">
         {!submitted ? (
           <motion.form
@@ -116,35 +125,92 @@ const ParcelForm: React.FC = () => {
               Create a Parcel
             </h2>
 
-            {renderFields("sender")}
-            {renderFields("recipient")}
+            <div className="grid grid-cols-2 gap-4">
+              {renderFields("sender")}
+              {renderFields("recipient")}
+            </div>
 
-            <label className="block">
-              <span className="text-sm text-gray-700 dark:text-gray-300">Weight (kg)</span>
-              <input
-                type="number"
-                name="weight"
-                value={parcel.weight}
-                onChange={handleChange}
-                min={0.1}
-                step={0.1}
-                className={inputClass}
-                required
-              />
-            </label>
+            <div className="grid grid-cols-2 gap-4">
+              <label className="block">
+                <span className="text-sm text-gray-700 dark:text-gray-300">Weight (kg)</span>
+                <input
+                  type="number"
+                  name="weight"
+                  value={parcel.weight}
+                  onChange={handleChange}
+                  min={0.1}
+                  step={0.1}
+                  className={inputClass}
+                  required
+                />
+              </label>
 
-            <label className="block">
-              <span className="text-sm text-gray-700 dark:text-gray-300">Description</span>
-              <textarea
-                name="description"
-                value={parcel.description}
-                onChange={handleChange}
-                className={inputClass}
-                placeholder="Description"
-                required
-              />
-            </label>
- 
+              <label className="block">
+                <span className="text-sm text-gray-700 dark:text-gray-300">Length (cm)</span>
+                <input
+                  type="number"
+                  name="length"
+                  value={parcel.length}
+                  onChange={handleChange}
+                  min={1}
+                  className={inputClass}
+                  required
+                />
+              </label>
+
+              <label className="block">
+                <span className="text-sm text-gray-700 dark:text-gray-300">Width (cm)</span>
+                <input
+                  type="number"
+                  name="width"
+                  value={parcel.width}
+                  onChange={handleChange}
+                  min={1}
+                  className={inputClass}
+                  required
+                />
+              </label>
+
+              <label className="block">
+                <span className="text-sm text-gray-700 dark:text-gray-300">Height (cm)</span>
+                <input
+                  type="number"
+                  name="height"
+                  value={parcel.height}
+                  onChange={handleChange}
+                  min={1}
+                  className={inputClass}
+                  required
+                />
+              </label>
+
+              <label className="col-span-2 block">
+                <span className="text-sm text-gray-700 dark:text-gray-300">Service Type</span>
+                <select
+                  name="service_type"
+                  value={parcel.service_type}
+                  onChange={handleChange}
+                  className={inputClass}
+                  required
+                >
+                  <option value="Standard">Standard</option>
+                  <option value="Express">Express</option>
+                  <option value="Same Day">Same Day</option>
+                </select>
+              </label>
+
+              <label className="col-span-2 block">
+                <span className="text-sm text-gray-700 dark:text-gray-300">Description</span>
+                <textarea
+                  name="description"
+                  value={parcel.description}
+                  onChange={handleChange}
+                  className={inputClass}
+                  placeholder="Description"
+                  required
+                />
+              </label>
+            </div>
 
             <button
               type="submit"

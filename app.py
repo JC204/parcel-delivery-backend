@@ -9,16 +9,10 @@ from flask_migrate import Migrate
 from dotenv import load_dotenv
 import logging
 
-from models import db, Customer, Courier, Parcel, TrackingUpdate
-from parcels import parcels_bp
-
-# Load environment variables
+ # Load environment variables
 load_dotenv()
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-
-# Initialize Flask app
+# Initialize Flask app FIRST
 app = Flask(__name__)
 
 # CORS setup
@@ -30,15 +24,23 @@ CORS(app, supports_credentials=True, origins=[
 
 # App config
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-unsafe')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///parcel_delivery.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'parcel_delivery.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Initialize DB and migration
+# Initialize DB and migration AFTER app is ready
+from database import db
 db.init_app(app)
 migrate = Migrate(app, db)
 
+# Now import models (after db is bound to app)
+from models import Customer, Courier, Parcel, TrackingUpdate
+
 # Register blueprints
+from parcels import parcels_bp
 app.register_blueprint(parcels_bp)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 # Utility function
 def generate_tracking_number():
@@ -62,7 +64,7 @@ def setup_demo_data():
             Customer(name='Bob Williams', email='bob@example.com', phone='555-2222', address='456 Banana Ave')
         ]
         db.session.add_all(customers)
-        db.session.commit()  # Ensures .id values are assigned
+        db.session.commit()
 
         for i in range(20):
             tracking_number = generate_tracking_number()
@@ -94,7 +96,7 @@ def setup_demo_data():
         db.session.commit()
 
     return jsonify({'message': 'Demo data initialized'}), 200
- # Auto-seed demo data on first request
+
 @app.before_request
 def auto_seed_demo():
     if not hasattr(app, 'demo_data_seeded'):
@@ -103,13 +105,13 @@ def auto_seed_demo():
                 setup_demo_data()
         app.demo_data_seeded = True
 
-# Route: Get all couriers
+
 @app.route('/couriers', methods=['GET'])
 def get_all_couriers():
     couriers = Courier.query.all()
     return jsonify([c.to_dict() for c in couriers]), 200
 
-# Route: Courier login
+
 @app.route('/couriers/login', methods=['POST'])
 def courier_login():
     data = request.json
@@ -127,7 +129,7 @@ def courier_login():
 
     return jsonify({'error': 'Invalid credentials'}), 401
 
-# Route: Get logged-in courier
+
 @app.route('/couriers/me', methods=['GET'])
 def get_logged_in_courier():
     courier_id = session.get('courier_id')
@@ -136,7 +138,7 @@ def get_logged_in_courier():
     courier = Courier.query.get(courier_id)
     return jsonify(courier.to_dict()) if courier else jsonify({'error': 'Courier not found'}), 404
 
-# Route: Courier logout
+
 @app.route('/couriers/logout', methods=['POST'])
 def courier_logout():
     session.pop('courier_id', None)
@@ -144,4 +146,59 @@ def courier_logout():
 
 # Run the server
 if __name__ == '__main__':
-    app.run(debug=True)
+     app.run(debug=True)
+
+
+     # Ensure these imports are available at the top or within the function
+from flask.cli import with_appcontext
+
+@app.cli.command("seed")
+@with_appcontext
+def seed():
+    from models import Customer, Courier, Parcel, TrackingUpdate
+    from database import db
+    from datetime import datetime, timedelta
+    import random
+    import string
+
+    db.drop_all()
+    db.create_all()
+
+    # Create demo customers
+    alice = Customer(name="Alice Johnson", email="alice@example.com", phone="555-1234", address="123 Main St")
+    bob = Customer(name="Bob Smith", email="bob@example.com", phone="555-5678", address="456 Oak Ave")
+    db.session.add_all([alice, bob])
+
+    # Create a courier
+    courier = Courier(id="C123", name="John Courier", email="john@delivery.com", phone="555-9012", vehicle="Bike")
+    db.session.add(courier)
+
+    # Create a parcel
+    tracking_number = ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
+    parcel = Parcel(
+        tracking_number=tracking_number,
+        sender=alice,
+        recipient=bob,
+        courier=courier,
+        weight=2.5,
+        length=10.0,
+        width=5.0,
+        height=3.0,
+        service_type="Express",
+        estimated_delivery=datetime.utcnow() + timedelta(days=2),
+        description="Books",
+        status="In Transit"
+    )
+    db.session.add(parcel)
+
+    # Add tracking update
+    update = TrackingUpdate(
+        parcel_id=tracking_number,
+        status="Dispatched",
+        location="Warehouse A",
+        description="Parcel has been dispatched"
+    )
+    db.session.add(update)
+
+    db.session.commit()
+    print("Seeded demo data successfully.")

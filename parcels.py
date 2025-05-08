@@ -16,6 +16,13 @@ def track_parcel(tracking_number):
         return jsonify({'error': 'Parcel not found'}), 404
     return jsonify(parcel.to_dict())
 
+
+@parcels_bp.route('/parcels', methods=['GET'])
+def get_all_parcels():
+    parcels = Parcel.query.all()
+    return jsonify([parcel.to_dict() for parcel in parcels]), 200
+
+
 @parcels_bp.route('/parcels', methods=['POST'])
 def create_parcel():
     try:
@@ -81,19 +88,7 @@ def create_parcel():
         print("Parcel creation failed:", str(e))
         return jsonify({'error': 'Parcel creation failed', 'details': str(e)}), 500
     
-    # Now create initial tracking update
-    update = TrackingUpdate(
-        parcel_id=parcel.id,
-        status='Created',
-        location='System',
-        timestamp=datetime.utcnow(),
-        description='Parcel created'
-    )
-    db.session.add(update)
-    db.session.commit()
-
-    return jsonify(parcel.to_dict()), 201
-
+ 
 @parcels_bp.route('/parcels/<tracking_number>/status', methods=['PUT'])
 def update_parcel_status(tracking_number):
     parcel = Parcel.query.filter_by(tracking_number=tracking_number).first()
