@@ -137,6 +137,10 @@ def courier_login():
 
     return jsonify({'error': 'Invalid credentials'}), 401
 
+@app.route('/couriers/<courier_id>/parcels', methods=['GET'])
+def get_parcels_by_courier(courier_id):
+    parcels = Parcel.query.filter_by(courier_id=courier_id).all()
+    return jsonify([p.to_dict() for p in parcels]), 200
 
 
 @app.route('/couriers/me', methods=['GET'])
