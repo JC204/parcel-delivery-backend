@@ -3,7 +3,7 @@ import random
 import string
 from datetime import datetime, timedelta
 from flask import Flask, request, jsonify, session
-
+from parcels import parcels_bp
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from dotenv import load_dotenv
@@ -17,6 +17,9 @@ os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # Optional, avoids HTTPS errors
 
 # Initialize Flask app
 app = Flask(__name__)
+
+# Register the blueprint
+app.register_blueprint(parcels_bp, url_prefix='/parcels')
 
 # CORS setup (add or adjust domains as needed)
 from flask_cors import CORS
