@@ -35,78 +35,75 @@ migrate = Migrate(app, db)
 # Import models
 from models import Customer, Courier, Parcel, TrackingUpdate
 
-# Register blueprints
-from parcels import parcels_bp
-app.register_blueprint(parcels_bp)
+# Logging
+logging.basicConfig(level=logging.INFO)
 
 @app.route("/")
 def index():
     return "Backend is running!", 200
 
-# Logging
-logging.basicConfig(level=logging.INFO)
-
-
-# Tracking number generator
+ 
 def generate_tracking_number():
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
 
-
-# Setup demo data
+ 
 def setup_demo_data():
-    if not Courier.query.first():
-        couriers = [
-            Courier(id='CR001', name='John Doe', email='john@example.com', phone='555-0100', vehicle='Van'),
-            Courier(id='CR002', name='Jane Smith', email='jane@example.com', phone='555-0200', vehicle='Bike'),
+    if Courier.query.first():
+        logging.info("Demo data already exists. Skipping setup.")
+        return
+
+    logging.info("Setting up demo data...")
+    
+    couriers = [
+        Courier(id='CR001', name='John Doe', email='john@example.com', phone='555-0100', vehicle='Van'),
+        Courier(id='CR002', name='Jane Smith', email='jane@example.com', phone='555-0200', vehicle='Bike'),
+    ]
+    db.session.bulk_save_objects(couriers)
+
+    customers = [
+        Customer(name='Alice Johnson', email='alice@example.com', phone='555-1111', address='123 Apple St'),
+        Customer(name='Bob Williams', email='bob@example.com', phone='555-2222', address='456 Banana Ave')
+    ]
+    db.session.add_all(customers)
+    db.session.commit()
+
+    for i in range(20):
+        tracking_number = generate_tracking_number()
+        sender = customers[i % len(customers)]
+        recipient = customers[(i + 1) % len(customers)]
+        parcel = Parcel(
+            tracking_number=tracking_number,
+            sender_id=sender.id,
+            recipient_id=recipient.id,
+            courier_id='CR001' if i % 2 == 0 else 'CR002',
+            weight=1.5 + i,
+            length=10 + i,
+            width=5 + i,
+            height=2 + i,
+            service_type='Express',
+            estimated_delivery=datetime.utcnow() + timedelta(days=3),
+            description=f"Demo parcel {i + 1}",
+            status='In Transit'
+        )
+        db.session.add(parcel)
+        db.session.flush()
+
+        updates = [
+            TrackingUpdate(parcel_id=parcel.id, status='Dispatched', location='Warehouse A', description='Left the facility'),
+            TrackingUpdate(parcel_id=parcel.id, status='In Transit', location='Distribution Center', description='On the way'),
         ]
-        db.session.bulk_save_objects(couriers)
+        db.session.bulk_save_objects(updates)
 
-    if not Customer.query.first():
-        customers = [
-            Customer(name='Alice Johnson', email='alice@example.com', phone='555-1111', address='123 Apple St'),
-            Customer(name='Bob Williams', email='bob@example.com', phone='555-2222', address='456 Banana Ave')
-        ]
-        db.session.add_all(customers)
-        db.session.commit()
+    db.session.commit()
+    logging.info("Demo data setup complete.")
 
-        for i in range(20):
-            tracking_number = generate_tracking_number()
-            sender = customers[i % len(customers)]
-            recipient = customers[(i + 1) % len(customers)]
-            parcel = Parcel(
-                tracking_number=tracking_number,
-                sender_id=sender.id,
-                recipient_id=recipient.id,
-                courier_id='CR001' if i % 2 == 0 else 'CR002',
-                weight=1.5 + i,
-                length=10 + i,
-                width=5 + i,
-                height=2 + i,
-                service_type='Express',
-                estimated_delivery=datetime.utcnow() + timedelta(days=3),
-                description=f"Demo parcel {i + 1}",
-                status='In Transit'
-            )
-            db.session.add(parcel)
-            db.session.flush()
 
-            updates = [
-                TrackingUpdate(parcel_id=parcel.id, status='Dispatched', location='Warehouse A', description='Left the facility'),
-                TrackingUpdate(parcel_id=parcel.id, status='In Transit', location='Distribution Center', description='On the way'),
-            ]
-            db.session.bulk_save_objects(updates)
-
-        db.session.commit()
-
-# Ensure DB is initialized and demo data is created once
-@app.before_request
-def ensure_initialized():
-    if not getattr(app, '_initialized', False):
-        db.create_all()
+@app.route('/init-demo', methods=['GET'])
+def run_demo_data_setup():
+    with app.app_context():
         setup_demo_data()
-        app._initialized = True
-
-# === ROUTES ===
+    return jsonify({'message': 'Demo data triggered manually'}), 200
+ 
 @app.route('/couriers', methods=['GET'])
 def get_all_couriers():
     couriers = Courier.query.all()
@@ -146,14 +143,7 @@ def courier_logout():
     session.pop('courier_id', None)
     return jsonify({'message': 'Logged out'}), 200
 
-@app.route('/init-demo', methods=['GET'])
-def run_demo_data_setup():
-    with app.app_context():
-        setup_demo_data()
-    return jsonify({'message': 'Demo data triggered manually'}), 200
-
-
-# === Run the app ===
+# Run the app (for local dev or gunicorn)
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
