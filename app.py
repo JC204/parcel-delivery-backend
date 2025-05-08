@@ -96,11 +96,13 @@ def setup_demo_data():
     return jsonify({'message': 'Demo data initialized'}), 200
 
 # Auto-seed demo data on first request
-@app.before_first_request
+@app.before_request
 def auto_seed_demo():
-    if not Parcel.query.first():
+    if not hasattr(app, 'demo_data_seeded'):
         with app.app_context():
-            setup_demo_data()
+            if not Parcel.query.first():
+                setup_demo_data()
+        app.demo_data_seeded = True
 
 # Route: Get all couriers
 @app.route('/couriers', methods=['GET'])
