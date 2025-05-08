@@ -8,6 +8,6 @@ SQLALCHEMY_TRACK_MODIFICATIONS=False
 
 # Optional, for ngrok or local development (replace with your actual ngrok URL)
 # If you are deploying to production, use your actual backend URL instead.
-API_URL= https://parcel-delivery-backend.onrender.com #  use production URL
+API_URL= https://8260-2603-3005-2b2c-a680-118d-fd6d-c6ea-1cef.ngrok-free.app#  use production URL
 
 DEBUG=True  # Change to False for production
