@@ -1,8 +1,8 @@
-"""initial
+"""add parcel id
 
-Revision ID: c188db1793cd
+Revision ID: 5dfb10b8bf43
 Revises: 
-Create Date: 2025-05-07 19:09:48.317143
+Create Date: 2025-05-07 20:10:20.265595
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'c188db1793cd'
+revision = '5dfb10b8bf43'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -36,6 +36,7 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('parcel',
+    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('tracking_number', sa.String(length=12), nullable=False),
     sa.Column('sender_id', sa.Integer(), nullable=False),
     sa.Column('recipient_id', sa.Integer(), nullable=False),
@@ -51,7 +52,7 @@ def upgrade():
     sa.ForeignKeyConstraint(['courier_id'], ['courier.id'], ),
     sa.ForeignKeyConstraint(['recipient_id'], ['customer.id'], ),
     sa.ForeignKeyConstraint(['sender_id'], ['customer.id'], ),
-    sa.PrimaryKeyConstraint('tracking_number')
+    sa.PrimaryKeyConstraint('id', 'tracking_number')
     )
     op.create_table('tracking_update',
     sa.Column('id', sa.Integer(), nullable=False),

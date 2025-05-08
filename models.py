@@ -37,6 +37,7 @@ class Courier(db.Model):
         }
 
 class Parcel(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
     tracking_number = db.Column(db.String(12), primary_key=True)
     sender_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
     recipient_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
