@@ -19,7 +19,7 @@ app = Flask(__name__)
 CORS(app, supports_credentials=True, origins=[
     "http://localhost:5173",
     "https://comforting-syrniki-99725d.netlify.app",
-    "https://parcel-delivery-frontend.netlify.app"  # <- Add your real Netlify domain here too
+    "https://parcel-delivery-frontend.netlify.app"
 ])
 
 # App config
@@ -42,15 +42,14 @@ app.register_blueprint(parcels_bp)
 # Logging
 logging.basicConfig(level=logging.INFO)
 
+
 # Tracking number generator
 def generate_tracking_number():
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
 
-# Setup demo route
-@app.route('/setup/demo', methods=['GET', 'POST'])
-def setup_demo_data():
-    db.create_all()
 
+# Setup demo data
+def setup_demo_data():
     if not Courier.query.first():
         couriers = [
             Courier(id='CR001', name='John Doe', email='john@example.com', phone='555-0100', vehicle='Van'),
@@ -95,16 +94,15 @@ def setup_demo_data():
 
         db.session.commit()
 
-    return jsonify({'message': 'Demo data initialized'}), 200
-
-@app.before_first_request
-def initialize():
-    with app.app_context():
+# Ensure DB is initialized and demo data is created once
+@app.before_request
+def ensure_initialized():
+    if not getattr(app, '_initialized', False):
         db.create_all()
-        if not Parcel.query.first():
-            setup_demo_data()
+        setup_demo_data()
+        app._initialized = True
 
-# Courier routes
+# === ROUTES ===
 @app.route('/couriers', methods=['GET'])
 def get_all_couriers():
     couriers = Courier.query.all()
@@ -148,5 +146,5 @@ def courier_logout():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+        setup_demo_data()
     app.run(debug=True)
- 
