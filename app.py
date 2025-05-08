@@ -61,8 +61,8 @@ def setup_demo_data():
             Customer(name='Alice Johnson', email='alice@example.com', phone='555-1111', address='123 Apple St'),
             Customer(name='Bob Williams', email='bob@example.com', phone='555-2222', address='456 Banana Ave')
         ]
-        db.session.bulk_save_objects(customers)
-        db.session.commit()
+        db.session.add_all(customers)
+        db.session.commit()  # Ensures .id values are assigned
 
         for i in range(20):
             tracking_number = generate_tracking_number()
@@ -94,8 +94,7 @@ def setup_demo_data():
         db.session.commit()
 
     return jsonify({'message': 'Demo data initialized'}), 200
-
-# Auto-seed demo data on first request
+ # Auto-seed demo data on first request
 @app.before_request
 def auto_seed_demo():
     if not hasattr(app, 'demo_data_seeded'):
