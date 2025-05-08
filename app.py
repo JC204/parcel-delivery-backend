@@ -110,8 +110,10 @@ def run_demo_data_setup():
     if os.getenv("ENV") == "production":
         return jsonify({'error': 'Disabled in production'}), 403
     with app.app_context():
+        db.create_all()  # Ensures tables exist before adding data
         setup_demo_data()
     return jsonify({'message': 'Demo data triggered manually'}), 200
+
 
 
 @app.route('/couriers', methods=['GET'])
