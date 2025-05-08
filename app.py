@@ -100,6 +100,8 @@ def setup_demo_data():
 
 @app.route('/init-demo', methods=['GET'])
 def run_demo_data_setup():
+    if os.getenv("ENV") == "production":
+        return jsonify({'error': 'Disabled in production'}), 403
     with app.app_context():
         setup_demo_data()
     return jsonify({'message': 'Demo data triggered manually'}), 200
@@ -143,9 +145,14 @@ def courier_logout():
     session.pop('courier_id', None)
     return jsonify({'message': 'Logged out'}), 200
 
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({'status': 'ok'}), 200
+
 # Run the app (for local dev or gunicorn)
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
         setup_demo_data()
-    app.run(debug=True)
+    app.run(debug=True, port=int(os.environ.get('PORT', 5000)))
