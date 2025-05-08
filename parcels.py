@@ -19,6 +19,7 @@ def track_parcel(tracking_number):
 @parcels_bp.route('/parcels', methods=['POST'])
 def create_parcel():
     data = request.json
+    print("Received data:", data)
     tracking_number = generate_tracking_number()
 
     # Create sender and recipient as Customer entries
