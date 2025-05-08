@@ -24,11 +24,16 @@ app.register_blueprint(parcels_bp, url_prefix='/parcels')
 # CORS setup (add or adjust domains as needed)
 from flask_cors import CORS
 
-CORS(app, supports_credentials=True, resources={r"/*": {"origins": [
-    "http://localhost:5173",
-    "https://comforting-syrniki-99725d.netlify.app",
-    "https://parcel-delivery-frontend.netlify.app"
-]}}, methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+from flask_cors import CORS
+
+CORS(app, supports_credentials=True, origins="*")
+
+@app.after_request
+def add_cors_headers(response):
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
+    response.headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
+    return response
 
 # App config
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-unsafe')
