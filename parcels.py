@@ -9,21 +9,19 @@ parcels_bp = Blueprint('parcels', __name__)
 def generate_tracking_number():
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
 
-@parcels_bp.route('/parcels/track/<string:tracking_number>', methods=['GET'])
+@parcels_bp.route('/track/<string:tracking_number>', methods=['GET'])
 def track_parcel(tracking_number):
     parcel = Parcel.query.filter_by(tracking_number=tracking_number).first()
     if parcel is None:
         return jsonify({'error': 'Parcel not found'}), 404
     return jsonify(parcel.to_dict())
 
-
-@parcels_bp.route('/parcels', methods=['GET'])
+@parcels_bp.route('/', methods=['GET'])
 def get_all_parcels():
     parcels = Parcel.query.all()
     return jsonify([parcel.to_dict() for parcel in parcels]), 200
 
-
-@parcels_bp.route('/parcels', methods=['POST'])
+@parcels_bp.route('/', methods=['POST'])
 def create_parcel():
     try:
         data = request.json
@@ -45,14 +43,14 @@ def create_parcel():
         )
         db.session.add(sender)
         db.session.add(recipient)
-        db.session.flush()  # Needed to get their IDs
+        db.session.flush()
 
-        # Auto-assign a random available courier
+       
         courier = Courier.query.order_by(db.func.random()).first()
         if not courier:
             return jsonify({'error': 'No couriers available'}), 500
 
-        # Create the parcel
+       
         parcel = Parcel(
             tracking_number=tracking_number,
             sender_id=sender.id,
@@ -70,7 +68,6 @@ def create_parcel():
         db.session.add(parcel)
         db.session.flush()
 
-        # Add initial tracking update
         update = TrackingUpdate(
             parcel_id=parcel.id,
             status='Created',
@@ -87,9 +84,8 @@ def create_parcel():
         db.session.rollback()
         print("Parcel creation failed:", str(e))
         return jsonify({'error': 'Parcel creation failed', 'details': str(e)}), 500
-    
- 
-@parcels_bp.route('/parcels/<tracking_number>/status', methods=['PUT'])
+
+@parcels_bp.route('/<tracking_number>/status', methods=['PUT'])
 def update_parcel_status(tracking_number):
     parcel = Parcel.query.filter_by(tracking_number=tracking_number).first()
     if not parcel:
