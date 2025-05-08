@@ -3,7 +3,7 @@ import random
 import string
 from datetime import datetime, timedelta
 from flask import Flask, request, jsonify, session
-from flask_cors import CORS
+
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from dotenv import load_dotenv
@@ -19,11 +19,13 @@ os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # Optional, avoids HTTPS errors
 app = Flask(__name__)
 
 # CORS setup (add or adjust domains as needed)
-CORS(app, supports_credentials=True, origins=[
+from flask_cors import CORS
+
+CORS(app, supports_credentials=True, resources={r"/*": {"origins": [
     "http://localhost:5173",
     "https://comforting-syrniki-99725d.netlify.app",
     "https://parcel-delivery-frontend.netlify.app"
-], methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+]}}, methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 
 # App config
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-unsafe')
