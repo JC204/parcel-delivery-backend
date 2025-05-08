@@ -20,7 +20,7 @@ CORS(app, supports_credentials=True, origins=[
     "http://localhost:5173",
     "https://comforting-syrniki-99725d.netlify.app",
     "https://parcel-delivery-frontend.netlify.app"
-])
+], methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 
 # App config
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-unsafe')
@@ -38,6 +38,10 @@ from models import Customer, Courier, Parcel, TrackingUpdate
 # Register blueprints
 from parcels import parcels_bp
 app.register_blueprint(parcels_bp)
+
+@app.route("/")
+def index():
+    return "Backend is running!", 200
 
 # Logging
 logging.basicConfig(level=logging.INFO)
