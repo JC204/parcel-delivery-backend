@@ -26,6 +26,7 @@ export async function trackParcel(trackingNumber: string): Promise<Parcel> {
 export async function submitParcel(
   parcelData: Omit<Parcel, 'tracking_number' | 'tracking_history'>
 ): Promise<Parcel> {
+  console.log("VITE_API_URL at runtime is:", import.meta.env.VITE_API_URL);
   const res = await fetch(`${API_URL}/parcels`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
