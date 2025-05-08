@@ -5,13 +5,23 @@ import { demoParcels } from '../demoParcels';
 export const API_URL = import.meta.env.VITE_API_URL;
 
 export async function trackParcel(trackingNumber: string): Promise<Parcel> {
-  const res = await fetch(`${API_URL}/parcels/track/${trackingNumber}`);
-  if (!res.ok) throw new Error("Failed to fetch tracking information");
-   console.log("API_URL is:", API_URL);
-  console.log("Tracking fetch URL:", `${API_URL}/parcels/track/${trackingNumber}`);
+  const url = `${API_URL}/parcels/track/${trackingNumber}`;
+  console.log("API_URL is:", API_URL);
+  console.log("Tracking fetch URL:", url);
+
+  const res = await fetch(url);
+
+  const contentType = res.headers.get("content-type");
+  if (!res.ok || !contentType?.includes("application/json")) {
+    const text = await res.text();
+    console.error("Unexpected response:", text);
+    throw new Error("Failed to fetch tracking information");
+  }
+
   return res.json();
-    
+
 }
+
 
 export async function submitParcel(
   parcelData: Omit<Parcel, 'tracking_number' | 'tracking_history'>
