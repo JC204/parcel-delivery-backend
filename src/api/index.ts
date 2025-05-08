@@ -90,7 +90,7 @@ export const getCustomerParcels = async (customerId: string): Promise<Parcel[]> 
   );
 };
 export async function getParcels(): Promise<Parcel[]> {
-  const response = await fetch("http://localhost:5000/parcels"); // adjust if needed
+  const response = await fetch(`${API_URL}/parcels`);
   if (!response.ok) {
     throw new Error("Failed to fetch parcels");
   }
